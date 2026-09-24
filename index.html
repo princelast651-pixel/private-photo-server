@@ -3,132 +3,514 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Private Photos</title>
+
+  <title>Private Vault</title>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
   <style>
+    * {
+      box-sizing: border-box;
+    }
+
     body {
       margin: 0;
       font-family: Arial, sans-serif;
-      background: #111;
+      background:
+        radial-gradient(circle at top, #202040 0%, #0b0b12 45%, #050509 100%);
       color: white;
       min-height: 100vh;
     }
 
-    .container {
-      width: 92%;
-      max-width: 900px;
-      margin: auto;
-      padding: 25px 0;
+    /* LOGIN */
+
+    #loginPage {
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+      animation: fadeIn 0.8s ease;
+    }
+
+    .login-box {
+      width: 100%;
+      max-width: 390px;
+      padding: 32px 25px;
+      border-radius: 24px;
+
+      background: rgba(30, 30, 45, 0.75);
+      backdrop-filter: blur(18px);
+
+      border: 1px solid rgba(255,255,255,0.1);
+
+      box-shadow:
+        0 20px 60px rgba(0,0,0,0.5);
+
+      animation: popUp 0.7s ease;
+    }
+
+    .lock {
+      width: 65px;
+      height: 65px;
+      margin: 0 auto 18px;
+
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      font-size: 30px;
+
+      border-radius: 20px;
+
+      background: linear-gradient(135deg, #6366f1, #8b5cf6);
+
+      box-shadow: 0 10px 30px rgba(99,102,241,0.35);
     }
 
     h1 {
       text-align: center;
+      margin: 5px 0 8px;
+      font-size: 28px;
     }
 
-    #loginPage {
-      max-width: 380px;
-      margin: 100px auto;
-      background: #1e1e1e;
-      padding: 25px;
-      border-radius: 15px;
+    .subtitle {
+      text-align: center;
+      color: #999;
+      font-size: 14px;
+      margin-bottom: 25px;
     }
 
     input {
       width: 100%;
-      box-sizing: border-box;
-      padding: 13px;
-      margin: 8px 0;
-      border: none;
-      border-radius: 8px;
-      background: #333;
+      padding: 15px;
+      margin: 7px 0;
+
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 12px;
+
+      background: rgba(255,255,255,0.07);
       color: white;
+
+      outline: none;
       font-size: 15px;
+
+      transition: 0.25s;
+    }
+
+    input:focus {
+      border-color: #6366f1;
+      box-shadow: 0 0 0 3px rgba(99,102,241,0.12);
     }
 
     button {
       width: 100%;
-      padding: 13px;
+      padding: 14px;
       margin-top: 10px;
+
       border: none;
-      border-radius: 8px;
-      background: #4f46e5;
+      border-radius: 12px;
+
       color: white;
-      font-size: 16px;
+      font-size: 15px;
+      font-weight: bold;
+
+      background: linear-gradient(135deg, #6366f1, #8b5cf6);
+
       cursor: pointer;
+
+      transition: transform 0.2s, box-shadow 0.2s;
     }
 
-    .logout {
-      background: #dc2626;
-      max-width: 150px;
-      display: block;
-      margin: 15px auto;
+    button:active {
+      transform: scale(0.97);
     }
 
-    .upload {
-      background: #16a34a;
+    button:hover {
+      box-shadow: 0 8px 25px rgba(99,102,241,0.3);
     }
 
-    #message {
+    #message,
+    #uploadMessage {
       text-align: center;
       margin-top: 12px;
-      font-size: 14px;
+      font-size: 13px;
+      color: #aaa;
     }
+
+
+    /* GALLERY */
 
     #galleryPage {
       display: none;
+      min-height: 100vh;
+      animation: fadeIn 0.7s ease;
     }
+
+    .container {
+      width: 92%;
+      max-width: 1050px;
+      margin: auto;
+      padding: 30px 0 20px;
+    }
+
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 25px;
+    }
+
+    .header h1 {
+      text-align: left;
+      margin: 0;
+      font-size: 25px;
+    }
+
+    .header p {
+      margin: 5px 0 0;
+      color: #888;
+      font-size: 13px;
+    }
+
+    .header-icon {
+      width: 50px;
+      height: 50px;
+
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      border-radius: 16px;
+
+      background: rgba(99,102,241,0.15);
+      border: 1px solid rgba(99,102,241,0.25);
+
+      font-size: 22px;
+    }
+
+    .actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .upload {
+      background: linear-gradient(135deg, #16a34a, #22c55e);
+    }
+
+    .refresh {
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+
+
+    /* GALLERY GRID */
 
     .gallery {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+      grid-template-columns: repeat(auto-fill, minmax(145px, 1fr));
       gap: 12px;
       margin-top: 25px;
     }
 
+    .photo-card {
+      position: relative;
+      overflow: hidden;
+
+      aspect-ratio: 1 / 1;
+
+      border-radius: 16px;
+
+      background: #16161f;
+
+      border: 1px solid rgba(255,255,255,0.08);
+
+      cursor: pointer;
+
+      animation: photoIn 0.5s ease both;
+
+      transition: transform 0.25s, box-shadow 0.25s;
+    }
+
+    .photo-card:hover {
+      transform: translateY(-4px) scale(1.015);
+      box-shadow: 0 15px 35px rgba(0,0,0,0.45);
+    }
+
     .photo {
       width: 100%;
-      aspect-ratio: 1 / 1;
+      height: 100%;
+
       object-fit: cover;
-      border-radius: 10px;
-      background: #222;
+
+      display: block;
+
+      transition: transform 0.4s ease;
+    }
+
+    .photo-card:hover .photo {
+      transform: scale(1.07);
+    }
+
+    .photo-card::after {
+      content: "⌕";
+      position: absolute;
+
+      right: 10px;
+      bottom: 10px;
+
+      width: 32px;
+      height: 32px;
+
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      border-radius: 50%;
+
+      background: rgba(0,0,0,0.55);
+      backdrop-filter: blur(8px);
+
+      opacity: 0;
+
+      transition: 0.25s;
+    }
+
+    .photo-card:hover::after {
+      opacity: 1;
+    }
+
+
+    /* FULLSCREEN VIEWER */
+
+    #viewer {
+      position: fixed;
+      inset: 0;
+
+      display: none;
+      align-items: center;
+      justify-content: center;
+
+      padding: 20px;
+
+      background: rgba(0,0,0,0.92);
+      backdrop-filter: blur(15px);
+
+      z-index: 999;
+
+      animation: fadeIn 0.25s ease;
+    }
+
+    #viewer img {
+      max-width: 95vw;
+      max-height: 88vh;
+
+      object-fit: contain;
+
+      border-radius: 12px;
+
+      box-shadow: 0 20px 80px rgba(0,0,0,0.7);
+
+      animation: zoomIn 0.3s ease;
+    }
+
+    .close {
+      position: fixed;
+
+      top: 20px;
+      right: 20px;
+
+      width: 45px;
+      height: 45px;
+
+      padding: 0;
+      margin: 0;
+
+      border-radius: 50%;
+
+      background: rgba(255,255,255,0.12);
+
+      font-size: 25px;
+      font-weight: normal;
+
+      z-index: 1000;
+    }
+
+
+    /* LOGOUT */
+
+    .logout {
+      margin-top: 25px;
+
+      background: transparent;
+
+      border: 1px solid rgba(255,80,80,0.3);
+
+      color: #ff7777;
+    }
+
+    .empty {
+      grid-column: 1 / -1;
+
+      text-align: center;
+
+      color: #777;
+
+      padding: 50px 10px;
+    }
+
+    .credit {
+      text-align: center;
+
+      color: #555;
+
+      font-size: 10px;
+
+      margin-top: 30px;
+      padding-bottom: 8px;
+
+      letter-spacing: 0.4px;
     }
 
     #fileInput {
       display: none;
     }
 
-    .empty {
-      text-align: center;
-      color: #aaa;
-      margin-top: 30px;
+
+    /* ANIMATIONS */
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+      }
+
+      to {
+        opacity: 1;
+      }
     }
+
+    @keyframes popUp {
+      from {
+        opacity: 0;
+        transform: translateY(25px) scale(0.96);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+
+    @keyframes photoIn {
+      from {
+        opacity: 0;
+        transform: translateY(15px) scale(0.95);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+
+    @keyframes zoomIn {
+      from {
+        opacity: 0;
+        transform: scale(0.9);
+      }
+
+      to {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+
+    @media (max-width: 500px) {
+
+      .gallery {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 9px;
+      }
+
+      .container {
+        width: 94%;
+        padding-top: 22px;
+      }
+
+      .actions {
+        grid-template-columns: 1fr;
+      }
+
+      .header h1 {
+        font-size: 22px;
+      }
+    }
+
   </style>
 </head>
 
 <body>
 
-  <!-- LOGIN -->
+
+  <!-- LOGIN PAGE -->
+
   <div id="loginPage">
-    <h1>🔒 Private Photos</h1>
 
-    <input type="email" id="email" placeholder="Email">
+    <div class="login-box">
 
-    <input type="password" id="password" placeholder="Password">
+      <div class="lock">
+        🔐
+      </div>
 
-    <button onclick="login()">Login</button>
+      <h1>Private Vault</h1>
 
-    <div id="message"></div>
+      <div class="subtitle">
+        Your private photo space
+      </div>
+
+      <input
+        type="email"
+        id="email"
+        placeholder="Email"
+      >
+
+      <input
+        type="password"
+        id="password"
+        placeholder="Password"
+      >
+
+      <button onclick="login()">
+        Unlock Vault
+      </button>
+
+      <div id="message"></div>
+
+    </div>
+
   </div>
 
 
-  <!-- PRIVATE GALLERY -->
+  <!-- GALLERY PAGE -->
+
   <div id="galleryPage">
 
     <div class="container">
 
-      <h1>📸 My Photos</h1>
+      <div class="header">
+
+        <div>
+          <h1>My Photos</h1>
+          <p>Your private collection</p>
+        </div>
+
+        <div class="header-icon">
+          📸
+        </div>
+
+      </div>
+
 
       <input
         type="file"
@@ -138,23 +520,68 @@
         onchange="uploadPhotos()"
       >
 
-      <button class="upload" onclick="document.getElementById('fileInput').click()">
-        📤 Upload Photos
-      </button>
 
-      <button onclick="loadPhotos()">
-        🔄 Refresh Gallery
-      </button>
+      <div class="actions">
+
+        <button
+          class="upload"
+          onclick="document.getElementById('fileInput').click()"
+        >
+          📤 Upload Photos
+        </button>
+
+        <button
+          class="refresh"
+          onclick="loadPhotos()"
+        >
+          🔄 Refresh
+        </button>
+
+      </div>
+
 
       <div id="uploadMessage"></div>
 
-      <div id="gallery" class="gallery"></div>
 
-      <button class="logout" onclick="logout()">
+      <div
+        id="gallery"
+        class="gallery"
+      ></div>
+
+
+      <button
+        class="logout"
+        onclick="logout()"
+      >
         Logout
       </button>
 
+
+      <div class="credit">
+        Page created by Prince
+      </div>
+
     </div>
+
+  </div>
+
+
+  <!-- FULLSCREEN PHOTO VIEWER -->
+
+  <div id="viewer">
+
+    <button
+      class="close"
+      onclick="closeViewer()"
+    >
+      ×
+    </button>
+
+    <img
+      id="viewerImage"
+      src=""
+      alt="Photo"
+    >
 
   </div>
 
@@ -167,6 +594,7 @@
     const SUPABASE_KEY =
       "sb_publishable_GiAZ68Ta1ypJwyqxi_m3GA_lnVUVK5W";
 
+
     const supabaseClient =
       window.supabase.createClient(
         SUPABASE_URL,
@@ -175,10 +603,11 @@
 
 
     // LOGIN
+
     async function login() {
 
       const email =
-        document.getElementById("email").value;
+        document.getElementById("email").value.trim();
 
       const password =
         document.getElementById("password").value;
@@ -186,32 +615,46 @@
       const message =
         document.getElementById("message");
 
+
       if (!email || !password) {
+
         message.textContent =
           "Enter email and password.";
+
         return;
       }
 
+
       message.textContent =
-        "Logging in...";
+        "Unlocking...";
+
 
       const { data, error } =
         await supabaseClient.auth.signInWithPassword({
+
           email: email,
+
           password: password
+
         });
 
+
       if (error) {
+
         message.textContent =
           error.message;
+
         return;
       }
 
+
       showGallery();
+
     }
 
 
     // SHOW GALLERY
+
     function showGallery() {
 
       document.getElementById("loginPage")
@@ -221,10 +664,12 @@
         .style.display = "block";
 
       loadPhotos();
+
     }
 
 
-    // UPLOAD
+    // UPLOAD PHOTOS
+
     async function uploadPhotos() {
 
       const files =
@@ -233,120 +678,287 @@
       const message =
         document.getElementById("uploadMessage");
 
+
       if (!files.length) return;
+
 
       message.textContent =
         "Uploading...";
 
+
       for (const file of files) {
 
         const fileName =
-          Date.now() + "-" +
-          Math.random().toString(36).substring(2) +
+          Date.now() +
+          "-" +
+          Math.random()
+            .toString(36)
+            .substring(2) +
           "-" +
           file.name;
+
 
         const { error } =
           await supabaseClient.storage
             .from("photos")
-            .upload(fileName, file);
+            .upload(
+              fileName,
+              file
+            );
+
 
         if (error) {
+
           message.textContent =
-            "Upload error: " + error.message;
+            "Upload error: " +
+            error.message;
+
           return;
         }
+
       }
 
-      message.textContent =
-        "Photos uploaded successfully!";
 
-      document.getElementById("fileInput").value = "";
+      message.textContent =
+        "Photos uploaded successfully ✓";
+
+
+      document.getElementById("fileInput").value =
+        "";
+
 
       loadPhotos();
+
     }
 
 
     // LOAD PHOTOS
+
     async function loadPhotos() {
 
       const gallery =
         document.getElementById("gallery");
 
+
       gallery.innerHTML =
-        '<p class="empty">Loading photos...</p>';
+        '<p class="empty">Loading your photos...</p>';
+
 
       const { data, error } =
         await supabaseClient.storage
           .from("photos")
           .list("", {
+
             limit: 100,
+
             sortBy: {
+
               column: "created_at",
+
               order: "desc"
+
             }
+
           });
 
+
       if (error) {
+
         gallery.innerHTML =
           '<p class="empty">Could not load photos.</p>';
+
         return;
       }
+
 
       if (!data || data.length === 0) {
+
         gallery.innerHTML =
           '<p class="empty">No photos yet.</p>';
+
         return;
       }
 
+
       gallery.innerHTML = "";
+
+
+      let delay = 0;
+
 
       for (const file of data) {
 
         const { data: signedData, error } =
           await supabaseClient.storage
             .from("photos")
-            .createSignedUrl(file.name, 3600);
+            .createSignedUrl(
+              file.name,
+              3600
+            );
+
 
         if (error) continue;
+
+
+        const card =
+          document.createElement("div");
+
+        card.className =
+          "photo-card";
+
+
+        card.style.animationDelay =
+          delay + "ms";
+
+
+        delay += 60;
+
 
         const img =
           document.createElement("img");
 
-        img.src = signedData.signedUrl;
-        img.className = "photo";
 
-        gallery.appendChild(img);
+        img.src =
+          signedData.signedUrl;
+
+
+        img.className =
+          "photo";
+
+
+        img.alt =
+          "Private photo";
+
+
+        card.appendChild(img);
+
+
+        card.onclick = function() {
+
+          openViewer(
+            signedData.signedUrl
+          );
+
+        };
+
+
+        gallery.appendChild(card);
+
       }
+
     }
 
 
+    // OPEN FULLSCREEN
+
+    function openViewer(url) {
+
+      const viewer =
+        document.getElementById("viewer");
+
+      const viewerImage =
+        document.getElementById("viewerImage");
+
+
+      viewerImage.src = url;
+
+      viewer.style.display =
+        "flex";
+
+    }
+
+
+    // CLOSE FULLSCREEN
+
+    function closeViewer() {
+
+      const viewer =
+        document.getElementById("viewer");
+
+
+      viewer.style.display =
+        "none";
+
+
+      document.getElementById("viewerImage")
+        .src = "";
+
+    }
+
+
+    // CLICK OUTSIDE PHOTO TO CLOSE
+
+    document.getElementById("viewer")
+      .addEventListener(
+        "click",
+        function(event) {
+
+          if (event.target === this) {
+
+            closeViewer();
+
+          }
+
+        }
+      );
+
+
+    // ESCAPE TO CLOSE
+
+    document.addEventListener(
+      "keydown",
+      function(event) {
+
+        if (event.key === "Escape") {
+
+          closeViewer();
+
+        }
+
+      }
+    );
+
+
     // LOGOUT
+
     async function logout() {
 
       await supabaseClient.auth.signOut();
 
+
       document.getElementById("galleryPage")
         .style.display = "none";
 
-      document.getElementById("loginPage")
-        .style.display = "block";
 
-      document.getElementById("email").value = "";
-      document.getElementById("password").value = "";
+      document.getElementById("loginPage")
+        .style.display = "flex";
+
+
+      document.getElementById("email").value =
+        "";
+
+      document.getElementById("password").value =
+        "";
+
     }
 
 
     // CHECK EXISTING LOGIN
+
     async function checkLogin() {
 
       const { data } =
         await supabaseClient.auth.getSession();
 
+
       if (data.session) {
+
         showGallery();
+
       }
+
     }
+
 
     checkLogin();
 
