@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Private Photo Server</title>
+  <title>Private Photos</title>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
@@ -13,31 +13,33 @@
       font-family: Arial, sans-serif;
       background: #111;
       color: white;
-      display: flex;
-      justify-content: center;
-      align-items: center;
       min-height: 100vh;
     }
 
-    .box {
-      width: 90%;
-      max-width: 380px;
-      background: #1e1e1e;
-      padding: 30px;
-      border-radius: 15px;
-      box-sizing: border-box;
+    .container {
+      width: 92%;
+      max-width: 900px;
+      margin: auto;
+      padding: 25px 0;
     }
 
     h1 {
       text-align: center;
-      margin-bottom: 25px;
+    }
+
+    #loginPage {
+      max-width: 380px;
+      margin: 100px auto;
+      background: #1e1e1e;
+      padding: 25px;
+      border-radius: 15px;
     }
 
     input {
       width: 100%;
+      box-sizing: border-box;
       padding: 13px;
       margin: 8px 0;
-      box-sizing: border-box;
       border: none;
       border-radius: 8px;
       background: #333;
@@ -48,7 +50,7 @@
     button {
       width: 100%;
       padding: 13px;
-      margin-top: 12px;
+      margin-top: 10px;
       border: none;
       border-radius: 8px;
       background: #4f46e5;
@@ -57,84 +59,141 @@
       cursor: pointer;
     }
 
-    button:hover {
-      background: #4338ca;
+    .logout {
+      background: #dc2626;
+      max-width: 150px;
+      display: block;
+      margin: 15px auto;
+    }
+
+    .upload {
+      background: #16a34a;
     }
 
     #message {
       text-align: center;
-      margin-top: 15px;
+      margin-top: 12px;
       font-size: 14px;
     }
 
-    #privatePage {
+    #galleryPage {
       display: none;
-      text-align: center;
     }
 
-    .logout {
-      background: #dc2626;
+    .gallery {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+      gap: 12px;
+      margin-top: 25px;
+    }
+
+    .photo {
+      width: 100%;
+      aspect-ratio: 1 / 1;
+      object-fit: cover;
+      border-radius: 10px;
+      background: #222;
+    }
+
+    #fileInput {
+      display: none;
+    }
+
+    .empty {
+      text-align: center;
+      color: #aaa;
+      margin-top: 30px;
     }
   </style>
 </head>
 
 <body>
 
-  <div class="box">
+  <!-- LOGIN -->
+  <div id="loginPage">
+    <h1>🔒 Private Photos</h1>
 
-    <!-- LOGIN PAGE -->
-    <div id="loginPage">
-      <h1>Private Photos</h1>
+    <input type="email" id="email" placeholder="Email">
+
+    <input type="password" id="password" placeholder="Password">
+
+    <button onclick="login()">Login</button>
+
+    <div id="message"></div>
+  </div>
+
+
+  <!-- PRIVATE GALLERY -->
+  <div id="galleryPage">
+
+    <div class="container">
+
+      <h1>📸 My Photos</h1>
 
       <input
-        type="email"
-        id="email"
-        placeholder="Email"
+        type="file"
+        id="fileInput"
+        accept="image/*"
+        multiple
+        onchange="uploadPhotos()"
       >
 
-      <input
-        type="password"
-        id="password"
-        placeholder="Password"
-      >
+      <button class="upload" onclick="document.getElementById('fileInput').click()">
+        📤 Upload Photos
+      </button>
 
-      <button onclick="login()">Login</button>
+      <button onclick="loadPhotos()">
+        🔄 Refresh Gallery
+      </button>
 
-      <div id="message"></div>
-    </div>
+      <div id="uploadMessage"></div>
 
-    <!-- PRIVATE PAGE -->
-    <div id="privatePage">
-      <h1>Welcome 🔒</h1>
-      <p>You are logged in.</p>
-      <p>Your private photos will appear here.</p>
+      <div id="gallery" class="gallery"></div>
 
-      <button class="logout" onclick="logout()">Logout</button>
+      <button class="logout" onclick="logout()">
+        Logout
+      </button>
+
     </div>
 
   </div>
 
+
   <script>
-    const SUPABASE_URL = "https://woyvvkyckiwougcqvgno.supabase.co";
 
-    const SUPABASE_KEY = "sb_publishable_GiAZ68Ta1ypJwyqxi_m3GA_lnVUVK5W";
+    const SUPABASE_URL =
+      "https://woyvvkyckiwougcqvgno.supabase.co";
 
-    const supabaseClient = window.supabase.createClient(
-      SUPABASE_URL,
-      SUPABASE_KEY
-    );
+    const SUPABASE_KEY =
+      "sb_publishable_GiAZ68Ta1ypJwyqxi_m3GA_lnVUVK5W";
 
+    const supabaseClient =
+      window.supabase.createClient(
+        SUPABASE_URL,
+        SUPABASE_KEY
+      );
+
+
+    // LOGIN
     async function login() {
-      const email = document.getElementById("email").value;
-      const password = document.getElementById("password").value;
-      const message = document.getElementById("message");
+
+      const email =
+        document.getElementById("email").value;
+
+      const password =
+        document.getElementById("password").value;
+
+      const message =
+        document.getElementById("message");
 
       if (!email || !password) {
-        message.textContent = "Enter email and password.";
+        message.textContent =
+          "Enter email and password.";
         return;
       }
 
-      message.textContent = "Logging in...";
+      message.textContent =
+        "Logging in...";
 
       const { data, error } =
         await supabaseClient.auth.signInWithPassword({
@@ -143,35 +202,154 @@
         });
 
       if (error) {
-        message.textContent = error.message;
+        message.textContent =
+          error.message;
         return;
       }
 
-      showPrivatePage();
+      showGallery();
     }
 
-    function showPrivatePage() {
-      document.getElementById("loginPage").style.display = "none";
-      document.getElementById("privatePage").style.display = "block";
+
+    // SHOW GALLERY
+    function showGallery() {
+
+      document.getElementById("loginPage")
+        .style.display = "none";
+
+      document.getElementById("galleryPage")
+        .style.display = "block";
+
+      loadPhotos();
     }
 
+
+    // UPLOAD
+    async function uploadPhotos() {
+
+      const files =
+        document.getElementById("fileInput").files;
+
+      const message =
+        document.getElementById("uploadMessage");
+
+      if (!files.length) return;
+
+      message.textContent =
+        "Uploading...";
+
+      for (const file of files) {
+
+        const fileName =
+          Date.now() + "-" +
+          Math.random().toString(36).substring(2) +
+          "-" +
+          file.name;
+
+        const { error } =
+          await supabaseClient.storage
+            .from("photos")
+            .upload(fileName, file);
+
+        if (error) {
+          message.textContent =
+            "Upload error: " + error.message;
+          return;
+        }
+      }
+
+      message.textContent =
+        "Photos uploaded successfully!";
+
+      document.getElementById("fileInput").value = "";
+
+      loadPhotos();
+    }
+
+
+    // LOAD PHOTOS
+    async function loadPhotos() {
+
+      const gallery =
+        document.getElementById("gallery");
+
+      gallery.innerHTML =
+        '<p class="empty">Loading photos...</p>';
+
+      const { data, error } =
+        await supabaseClient.storage
+          .from("photos")
+          .list("", {
+            limit: 100,
+            sortBy: {
+              column: "created_at",
+              order: "desc"
+            }
+          });
+
+      if (error) {
+        gallery.innerHTML =
+          '<p class="empty">Could not load photos.</p>';
+        return;
+      }
+
+      if (!data || data.length === 0) {
+        gallery.innerHTML =
+          '<p class="empty">No photos yet.</p>';
+        return;
+      }
+
+      gallery.innerHTML = "";
+
+      for (const file of data) {
+
+        const { data: signedData, error } =
+          await supabaseClient.storage
+            .from("photos")
+            .createSignedUrl(file.name, 3600);
+
+        if (error) continue;
+
+        const img =
+          document.createElement("img");
+
+        img.src = signedData.signedUrl;
+        img.className = "photo";
+
+        gallery.appendChild(img);
+      }
+    }
+
+
+    // LOGOUT
     async function logout() {
+
       await supabaseClient.auth.signOut();
 
-      document.getElementById("privatePage").style.display = "none";
-      document.getElementById("loginPage").style.display = "block";
-      document.getElementById("message").textContent = "";
+      document.getElementById("galleryPage")
+        .style.display = "none";
+
+      document.getElementById("loginPage")
+        .style.display = "block";
+
+      document.getElementById("email").value = "";
+      document.getElementById("password").value = "";
     }
 
+
+    // CHECK EXISTING LOGIN
     async function checkLogin() {
-      const { data } = await supabaseClient.auth.getSession();
+
+      const { data } =
+        await supabaseClient.auth.getSession();
 
       if (data.session) {
-        showPrivatePage();
+        showGallery();
       }
     }
 
     checkLogin();
+
   </script>
 
 </body>
