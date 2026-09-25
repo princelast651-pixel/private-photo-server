@@ -1,2042 +1,2190 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
 
-<meta name="viewport"
-      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-
-<meta name="google-site-verification"
-      content="HJ3uuOpqTshJgL8yTaZMTs8veAeB0P78dJ_b7VvQTWg">
-
-<title>Private Vault</title>
-
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
-<style>
-*{
-  box-sizing:border-box;
-  margin:0;
-  padding:0;
-}
-
-:root{
-  --bg:#08090d;
-  --card:#11131a;
-  --card2:#181b24;
-  --text:#f5f7fb;
-  --muted:#9299a8;
-  --border:#272b36;
-  --accent:#7c5cff;
-  --accent2:#9b83ff;
-  --danger:#ff4d67;
-  --success:#35d07f;
-  --shadow:0 20px 60px rgba(0,0,0,.35);
-}
-
-body.light{
-  --bg:#f3f5f9;
-  --card:#ffffff;
-  --card2:#eef0f5;
-  --text:#11131a;
-  --muted:#697080;
-  --border:#dfe3eb;
-  --shadow:0 20px 50px rgba(30,40,70,.12);
-}
-
-html,body{
-  width:100%;
-  min-height:100%;
-}
-
-body{
-  font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
-  background:
-    radial-gradient(circle at 15% 10%,rgba(124,92,255,.13),transparent 30%),
-    radial-gradient(circle at 85% 80%,rgba(0,180,255,.08),transparent 30%),
-    var(--bg);
-  color:var(--text);
-  transition:.25s;
-}
-
-button,input,select{
-  font:inherit;
-}
-
-button{
-  border:0;
-  cursor:pointer;
-}
-
-.hidden{
-  display:none!important;
-}
-
-/* AUTH */
-
-.auth-wrap{
-  min-height:100vh;
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  padding:20px;
-}
-
-.auth-card{
-  width:100%;
-  max-width:420px;
-  background:rgba(17,19,26,.92);
-  border:1px solid var(--border);
-  border-radius:28px;
-  padding:30px;
-  box-shadow:var(--shadow);
-  backdrop-filter:blur(20px);
-  animation:fadeUp .5s ease;
-}
-
-body.light .auth-card{
-  background:rgba(255,255,255,.94);
-}
-
-.logo{
-  width:62px;
-  height:62px;
-  display:grid;
-  place-items:center;
-  border-radius:20px;
-  background:linear-gradient(135deg,var(--accent),#4f8cff);
-  font-size:28px;
-  margin-bottom:18px;
-  box-shadow:0 12px 35px rgba(124,92,255,.35);
-}
-
-h1{
-  font-size:28px;
-  margin-bottom:7px;
-}
-
-.subtitle{
-  color:var(--muted);
-  font-size:14px;
-  margin-bottom:25px;
-}
-
-.field{
-  margin-bottom:14px;
-}
-
-.field label{
-  display:block;
-  color:var(--muted);
-  font-size:13px;
-  margin-bottom:7px;
-}
-
-.field input,
-.search-box,
-.album-select{
-  width:100%;
-  background:var(--card2);
-  color:var(--text);
-  border:1px solid var(--border);
-  border-radius:14px;
-  padding:13px 14px;
-  outline:none;
-  transition:.2s;
-}
-
-.field input:focus,
-.search-box:focus,
-.album-select:focus{
-  border-color:var(--accent);
-  box-shadow:0 0 0 3px rgba(124,92,255,.12);
-}
-
-.primary-btn{
-  width:100%;
-  padding:14px;
-  border-radius:14px;
-  color:white;
-  background:linear-gradient(135deg,var(--accent),#5d82ff);
-  font-weight:700;
-  margin-top:4px;
-  transition:.2s;
-}
-
-.primary-btn:active{
-  transform:scale(.98);
-}
-
-.secondary-btn{
-  background:var(--card2);
-  color:var(--text);
-  border:1px solid var(--border);
-  padding:11px 14px;
-  border-radius:12px;
-}
-
-.auth-switch{
-  margin-top:18px;
-  text-align:center;
-  color:var(--muted);
-  font-size:14px;
-}
-
-.link-btn{
-  color:var(--accent2);
-  background:none;
-  font-weight:700;
-}
-
-.message{
-  min-height:20px;
-  margin-top:12px;
-  color:var(--muted);
-  font-size:13px;
-  text-align:center;
-}
-
-/* APP */
-
-.app{
-  min-height:100vh;
-}
-
-.topbar{
-  position:sticky;
-  top:0;
-  z-index:20;
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  padding:14px 18px;
-  border-bottom:1px solid var(--border);
-  background:rgba(8,9,13,.82);
-  backdrop-filter:blur(18px);
-}
-
-body.light .topbar{
-  background:rgba(255,255,255,.82);
-}
-
-.brand{
-  display:flex;
-  align-items:center;
-  gap:10px;
-}
-
-.brand-icon{
-  width:38px;
-  height:38px;
-  display:grid;
-  place-items:center;
-  border-radius:12px;
-  background:linear-gradient(135deg,var(--accent),#4f8cff);
-}
-
-.brand-title{
-  font-weight:800;
-}
-
-.brand-email{
-  color:var(--muted);
-  font-size:11px;
-  max-width:150px;
-  overflow:hidden;
-  text-overflow:ellipsis;
-  white-space:nowrap;
-}
-
-.top-actions{
-  display:flex;
-  gap:7px;
-}
-
-.icon-btn{
-  width:39px;
-  height:39px;
-  border-radius:12px;
-  background:var(--card2);
-  border:1px solid var(--border);
-  color:var(--text);
-}
-
-.container{
-  width:min(1200px,100%);
-  margin:auto;
-  padding:22px 16px 80px;
-}
-
-.hero{
-  display:flex;
-  justify-content:space-between;
-  gap:15px;
-  align-items:flex-end;
-  margin-bottom:20px;
-}
-
-.hero h2{
-  font-size:27px;
-}
-
-.hero p{
-  color:var(--muted);
-  font-size:13px;
-  margin-top:4px;
-}
-
-.upload-btn{
-  background:linear-gradient(135deg,var(--accent),#5d82ff);
-  color:#fff;
-  padding:13px 17px;
-  border-radius:14px;
-  font-weight:800;
-  white-space:nowrap;
-}
-
-.toolbar{
-  display:grid;
-  grid-template-columns:1fr auto auto;
-  gap:9px;
-  margin-bottom:15px;
-}
-
-.search-wrap{
-  position:relative;
-}
-
-.search-box{
-  padding-left:40px;
-}
-
-.search-icon{
-  position:absolute;
-  left:14px;
-  top:50%;
-  transform:translateY(-50%);
-  color:var(--muted);
-}
-
-.toolbar select{
-  min-width:125px;
-}
-
-.stats{
-  display:flex;
-  gap:9px;
-  overflow:auto;
-  margin-bottom:17px;
-  scrollbar-width:none;
-}
-
-.stat{
-  min-width:135px;
-  padding:13px;
-  background:var(--card);
-  border:1px solid var(--border);
-  border-radius:16px;
-}
-
-.stat-value{
-  font-weight:800;
-  font-size:18px;
-}
-
-.stat-label{
-  color:var(--muted);
-  font-size:11px;
-  margin-top:2px;
-}
-
-/* ALBUMS */
-
-.album-bar{
-  display:flex;
-  gap:8px;
-  overflow:auto;
-  padding-bottom:4px;
-  margin-bottom:18px;
-  scrollbar-width:none;
-}
-
-.album-chip{
-  white-space:nowrap;
-  padding:9px 13px;
-  border-radius:999px;
-  background:var(--card);
-  color:var(--muted);
-  border:1px solid var(--border);
-}
-
-.album-chip.active{
-  color:#fff;
-  background:var(--accent);
-  border-color:var(--accent);
-}
-
-/* GRID */
-
-.gallery{
-  display:grid;
-  grid-template-columns:repeat(4,1fr);
-  gap:10px;
-}
-
-.photo{
-  position:relative;
-  aspect-ratio:1;
-  overflow:hidden;
-  border-radius:17px;
-  background:var(--card2);
-  border:1px solid var(--border);
-  animation:fadeIn .35s ease;
-}
-
-.photo img{
-  width:100%;
-  height:100%;
-  object-fit:cover;
-  display:block;
-  transition:.3s;
-}
-
-.photo:hover img{
-  transform:scale(1.04);
-}
-
-.photo-actions{
-  position:absolute;
-  right:7px;
-  top:7px;
-  display:flex;
-  gap:5px;
-}
-
-.photo-actions button{
-  width:32px;
-  height:32px;
-  border-radius:10px;
-  color:#fff;
-  background:rgba(0,0,0,.65);
-  backdrop-filter:blur(7px);
-}
-
-.empty{
-  padding:70px 20px;
-  text-align:center;
-  color:var(--muted);
-}
-
-.empty-icon{
-  font-size:45px;
-  margin-bottom:12px;
-}
-
-/* PROFILE */
-
-.panel{
-  background:var(--card);
-  border:1px solid var(--border);
-  border-radius:20px;
-  padding:18px;
-  margin-top:20px;
-}
-
-.panel-title{
-  font-weight:800;
-  margin-bottom:14px;
-}
-
-.profile-row{
-  display:flex;
-  justify-content:space-between;
-  gap:10px;
-  padding:12px 0;
-  border-bottom:1px solid var(--border);
-}
-
-.profile-row:last-child{
-  border-bottom:0;
-}
-
-.profile-label{
-  color:var(--muted);
-  font-size:13px;
-}
-
-.profile-value{
-  font-size:13px;
-  text-align:right;
-  max-width:65%;
-  word-break:break-all;
-}
-
-/* UPLOAD STATUS */
-
-.upload-list{
-  margin-top:15px;
-}
-
-.upload-item{
-  display:flex;
-  align-items:center;
-  gap:10px;
-  padding:11px;
-  background:var(--card2);
-  border-radius:12px;
-  margin-bottom:7px;
-}
-
-.upload-name{
-  flex:1;
-  min-width:0;
-  white-space:nowrap;
-  overflow:hidden;
-  text-overflow:ellipsis;
-  font-size:13px;
-}
-
-.upload-status{
-  color:var(--muted);
-  font-size:12px;
-}
-
-/* MODAL */
-
-.modal{
-  position:fixed;
-  inset:0;
-  z-index:100;
-  display:none;
-  align-items:center;
-  justify-content:center;
-  background:rgba(0,0,0,.78);
-  backdrop-filter:blur(12px);
-  padding:15px;
-}
-
-.modal.show{
-  display:flex;
-}
-
-.modal-card{
-  width:min(500px,100%);
-  max-height:90vh;
-  overflow:auto;
-  background:var(--card);
-  border:1px solid var(--border);
-  border-radius:22px;
-  padding:20px;
-  box-shadow:var(--shadow);
-}
-
-.modal-head{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  margin-bottom:17px;
-}
-
-.modal-head h3{
-  font-size:20px;
-}
-
-.viewer{
-  position:fixed;
-  inset:0;
-  z-index:200;
-  background:rgba(0,0,0,.96);
-  display:none;
-  flex-direction:column;
-}
-
-.viewer.show{
-  display:flex;
-}
-
-.viewer-top{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  padding:14px;
-}
-
-.viewer-title{
-  color:#fff;
-  max-width:65%;
-  overflow:hidden;
-  text-overflow:ellipsis;
-  white-space:nowrap;
-}
-
-.viewer-actions{
-  display:flex;
-  gap:7px;
-}
-
-.viewer-btn{
-  width:40px;
-  height:40px;
-  border-radius:12px;
-  background:rgba(255,255,255,.1);
-  color:#fff;
-}
-
-.viewer-body{
-  flex:1;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  overflow:hidden;
-  touch-action:none;
-}
-
-.viewer-body img{
-  max-width:95%;
-  max-height:85%;
-  object-fit:contain;
-  transition:transform .15s;
-  transform-origin:center;
-}
-
-/* TOAST */
-
-.toast-container{
-  position:fixed;
-  right:15px;
-  bottom:15px;
-  z-index:500;
-  display:flex;
-  flex-direction:column;
-  gap:8px;
-  max-width:calc(100% - 30px);
-}
-
-.toast{
-  background:#171922;
-  color:#fff;
-  border:1px solid #303441;
-  border-radius:13px;
-  padding:12px 15px;
-  box-shadow:var(--shadow);
-  animation:toastIn .25s ease;
-  font-size:13px;
-}
-
-/* FOOTER */
-
-footer{
-  text-align:center;
-  color:var(--muted);
-  font-size:11px;
-  margin-top:45px;
-}
-
-/* ANIMATIONS */
-
-@keyframes fadeUp{
-  from{opacity:0;transform:translateY(18px)}
-  to{opacity:1;transform:translateY(0)}
-}
-
-@keyframes fadeIn{
-  from{opacity:0;transform:scale(.97)}
-  to{opacity:1;transform:scale(1)}
-}
-
-@keyframes toastIn{
-  from{opacity:0;transform:translateY(10px)}
-  to{opacity:1;transform:translateY(0)}
-}
-
-/* MOBILE */
-
-@media(max-width:750px){
-  .gallery{
-    grid-template-columns:repeat(3,1fr);
-    gap:7px;
+  <meta charset="UTF-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
+
+  <title>
+    Private Photo Storage | Secure Personal Photo Vault
+  </title>
+
+  <meta
+    name="description"
+    content="Private Photo Storage is a secure personal photo vault for storing, organizing, viewing and managing your photos online."
+  >
+
+  <meta
+    name="robots"
+    content="index, follow"
+  >
+
+  <meta
+    name="author"
+    content="Prince"
+  >
+
+  <meta
+    name="theme-color"
+    content="#7c5cff"
+  >
+
+  <!-- Google Search Console verification -->
+  <meta
+    name="google-site-verification"
+    content="HJ3uuOpqTshJgL8yTaZMTs8veAeB0P78dJ_b7VvQTWg"
+  >
+
+  <!-- Open Graph -->
+  <meta
+    property="og:type"
+    content="website"
+  >
+
+  <meta
+    property="og:title"
+    content="Private Photo Storage | Secure Personal Photo Vault"
+  >
+
+  <meta
+    property="og:description"
+    content="Securely store, organize, view and manage your personal photos in your private online photo vault."
+  >
+
+  <meta
+    property="og:site_name"
+    content="Private Photo Storage"
+  >
+
+  <!-- Twitter -->
+  <meta
+    name="twitter:card"
+    content="summary"
+  >
+
+  <meta
+    name="twitter:title"
+    content="Private Photo Storage | Secure Personal Photo Vault"
+  >
+
+  <meta
+    name="twitter:description"
+    content="A secure private photo storage and personal photo vault."
+  >
+
+  <!-- Vault favicon -->
+  <link
+    rel="icon"
+    type="image/svg+xml"
+    href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect x='8' y='8' width='84' height='84' rx='20' fill='%237c5cff'/%3E%3Crect x='25' y='30' width='50' height='45' rx='7' fill='none' stroke='white' stroke-width='6'/%3E%3Ccircle cx='50' cy='52' r='9' fill='white'/%3E%3Cpath d='M50 52v13' stroke='%237c5cff' stroke-width='5' stroke-linecap='round'/%3E%3C/svg%3E"
+  >
+
+  <!-- Structured data -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "name": "Private Photo Storage",
+    "description": "A secure personal photo storage and private photo vault for storing, organizing, viewing and managing photos.",
+    "inLanguage": "en"
   }
+  </script>
 
-  .toolbar{
-    grid-template-columns:1fr 1fr;
-  }
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-  .search-wrap{
-    grid-column:1/-1;
-  }
+  <style>
 
-  .hero{
-    align-items:center;
-  }
+    *{
+      box-sizing:border-box;
+      margin:0;
+      padding:0;
+    }
 
-  .hero h2{
-    font-size:23px;
-  }
+    :root{
+      --bg:#0b0b10;
+      --card:#15151d;
+      --card2:#1b1b25;
+      --text:#ffffff;
+      --muted:#9b9baa;
+      --border:#2a2a36;
+      --primary:#7c5cff;
+      --primary2:#6847f5;
+      --danger:#ff4d67;
+      --success:#35d07f;
+      --shadow:0 20px 60px rgba(0,0,0,.35);
+    }
 
-  .hero p{
-    font-size:12px;
-  }
+    body.light{
+      --bg:#f4f4f8;
+      --card:#ffffff;
+      --card2:#f0f0f5;
+      --text:#17171d;
+      --muted:#70707c;
+      --border:#ddddE7;
+      --shadow:0 15px 40px rgba(0,0,0,.08);
+    }
 
-  .upload-btn{
-    padding:11px 13px;
-  }
-}
+    body{
+      min-height:100vh;
+      background:var(--bg);
+      color:var(--text);
+      font-family:
+        Inter,
+        system-ui,
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        sans-serif;
+      transition:.25s;
+    }
 
-@media(max-width:430px){
-  .auth-card{
-    padding:23px;
-  }
+    button,
+    input,
+    select{
+      font:inherit;
+    }
 
-  .gallery{
-    grid-template-columns:repeat(2,1fr);
-  }
+    button{
+      cursor:pointer;
+    }
 
-  .brand-email{
-    max-width:105px;
-  }
+    .hidden{
+      display:none !important;
+    }
 
-  .toolbar{
-    grid-template-columns:1fr;
-  }
+    /* AUTH */
 
-  .toolbar select{
-    width:100%;
-  }
-}
-</style>
+    #auth{
+      min-height:100vh;
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      padding:20px;
+    }
+
+    .auth-card{
+      width:100%;
+      max-width:430px;
+      background:var(--card);
+      border:1px solid var(--border);
+      border-radius:24px;
+      padding:30px;
+      box-shadow:var(--shadow);
+      animation:fadeUp .45s ease;
+    }
+
+    @keyframes fadeUp{
+      from{
+        opacity:0;
+        transform:translateY(15px);
+      }
+      to{
+        opacity:1;
+        transform:translateY(0);
+      }
+    }
+
+    .vault-logo{
+      width:72px;
+      height:72px;
+      border-radius:22px;
+      background:linear-gradient(
+        135deg,
+        var(--primary),
+        #9b7cff
+      );
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      font-size:36px;
+      margin:0 auto 18px;
+      box-shadow:
+        0 12px 35px rgba(124,92,255,.3);
+    }
+
+    .auth-card h1{
+      text-align:center;
+      font-size:27px;
+      margin-bottom:8px;
+    }
+
+    .auth-subtitle{
+      color:var(--muted);
+      text-align:center;
+      font-size:14px;
+      line-height:1.5;
+      margin-bottom:18px;
+    }
+
+    .seo-text{
+      color:var(--muted);
+      font-size:12px;
+      line-height:1.6;
+      text-align:center;
+      margin-bottom:20px;
+    }
+
+    .field{
+      margin-bottom:14px;
+    }
+
+    .field label{
+      display:block;
+      font-size:13px;
+      margin-bottom:7px;
+      color:var(--muted);
+    }
+
+    .field input{
+      width:100%;
+      padding:14px;
+      border-radius:13px;
+      border:1px solid var(--border);
+      background:var(--card2);
+      color:var(--text);
+      outline:none;
+      transition:.2s;
+    }
+
+    .field input:focus{
+      border-color:var(--primary);
+      box-shadow:0 0 0 3px rgba(124,92,255,.12);
+    }
+
+    .primary-btn{
+      width:100%;
+      padding:14px;
+      border:0;
+      border-radius:13px;
+      color:#fff;
+      background:linear-gradient(
+        135deg,
+        var(--primary),
+        var(--primary2)
+      );
+      font-weight:700;
+      transition:.2s;
+      box-shadow:0 8px 25px rgba(124,92,255,.2);
+    }
+
+    .primary-btn:hover{
+      transform:translateY(-1px);
+    }
+
+    .primary-btn:active{
+      transform:scale(.98);
+    }
+
+    .auth-switch{
+      text-align:center;
+      margin-top:18px;
+      color:var(--muted);
+      font-size:13px;
+    }
+
+    .auth-switch button{
+      border:0;
+      background:none;
+      color:var(--primary);
+      font-weight:700;
+    }
+
+    .message{
+      min-height:20px;
+      color:var(--danger);
+      font-size:13px;
+      text-align:center;
+      margin-top:12px;
+    }
+
+    /* APP */
+
+    #app{
+      min-height:100vh;
+    }
+
+    .topbar{
+      position:sticky;
+      top:0;
+      z-index:30;
+      height:70px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      padding:0 20px;
+      background:rgba(11,11,16,.85);
+      backdrop-filter:blur(18px);
+      border-bottom:1px solid var(--border);
+    }
+
+    body.light .topbar{
+      background:rgba(244,244,248,.85);
+    }
+
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      font-weight:800;
+      font-size:17px;
+    }
+
+    .brand-icon{
+      width:38px;
+      height:38px;
+      border-radius:11px;
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      background:linear-gradient(
+        135deg,
+        var(--primary),
+        #9b7cff
+      );
+      font-size:19px;
+    }
+
+    .top-actions{
+      display:flex;
+      align-items:center;
+      gap:8px;
+    }
+
+    .icon-btn{
+      width:40px;
+      height:40px;
+      border-radius:11px;
+      border:1px solid var(--border);
+      background:var(--card);
+      color:var(--text);
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      transition:.2s;
+    }
+
+    .icon-btn:hover{
+      border-color:var(--primary);
+    }
+
+    .container{
+      width:100%;
+      max-width:1200px;
+      margin:auto;
+      padding:25px 18px 50px;
+    }
+
+    .welcome{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:15px;
+      margin-bottom:20px;
+    }
+
+    .welcome h2{
+      font-size:23px;
+    }
+
+    .welcome p{
+      color:var(--muted);
+      font-size:13px;
+      margin-top:4px;
+    }
+
+    .stats{
+      display:grid;
+      grid-template-columns:repeat(3,1fr);
+      gap:12px;
+      margin-bottom:20px;
+    }
+
+    .stat{
+      background:var(--card);
+      border:1px solid var(--border);
+      border-radius:17px;
+      padding:17px;
+    }
+
+    .stat-label{
+      color:var(--muted);
+      font-size:12px;
+      margin-bottom:6px;
+    }
+
+    .stat-value{
+      font-size:20px;
+      font-weight:800;
+    }
+
+    .toolbar{
+      background:var(--card);
+      border:1px solid var(--border);
+      border-radius:18px;
+      padding:13px;
+      display:flex;
+      gap:9px;
+      flex-wrap:wrap;
+      margin-bottom:20px;
+    }
+
+    .search{
+      flex:1;
+      min-width:180px;
+      position:relative;
+    }
+
+    .search input{
+      width:100%;
+      padding:12px 13px;
+      border-radius:11px;
+      border:1px solid var(--border);
+      background:var(--card2);
+      color:var(--text);
+      outline:none;
+    }
+
+    .select{
+      padding:12px;
+      border-radius:11px;
+      border:1px solid var(--border);
+      background:var(--card2);
+      color:var(--text);
+      outline:none;
+    }
+
+    .small-btn{
+      padding:11px 14px;
+      border-radius:11px;
+      border:1px solid var(--border);
+      background:var(--card2);
+      color:var(--text);
+      transition:.2s;
+    }
+
+    .small-btn:hover{
+      border-color:var(--primary);
+    }
+
+    .upload-area{
+      border:1px dashed var(--border);
+      border-radius:18px;
+      background:var(--card);
+      padding:22px;
+      text-align:center;
+      margin-bottom:22px;
+    }
+
+    .upload-area h3{
+      margin-bottom:6px;
+    }
+
+    .upload-area p{
+      color:var(--muted);
+      font-size:13px;
+      margin-bottom:14px;
+    }
+
+    #fileInput{
+      display:none;
+    }
+
+    .upload-btn{
+      display:inline-flex;
+      justify-content:center;
+      align-items:center;
+      padding:12px 18px;
+      border-radius:12px;
+      background:var(--primary);
+      color:white;
+      font-weight:700;
+      cursor:pointer;
+    }
+
+    .progress-wrap{
+      margin-top:15px;
+      display:none;
+    }
+
+    .progress-bg{
+      width:100%;
+      height:7px;
+      background:var(--card2);
+      border-radius:99px;
+      overflow:hidden;
+    }
+
+    .progress-bar{
+      width:0%;
+      height:100%;
+      background:var(--primary);
+      transition:.2s;
+    }
+
+    .progress-text{
+      color:var(--muted);
+      font-size:12px;
+      margin-top:7px;
+    }
+
+    .albums{
+      display:flex;
+      gap:8px;
+      overflow-x:auto;
+      padding-bottom:5px;
+      margin-bottom:18px;
+    }
+
+    .album-btn{
+      white-space:nowrap;
+      padding:9px 13px;
+      border-radius:10px;
+      border:1px solid var(--border);
+      background:var(--card);
+      color:var(--muted);
+    }
+
+    .album-btn.active{
+      background:var(--primary);
+      color:white;
+      border-color:var(--primary);
+    }
+
+    .gallery{
+      display:grid;
+      grid-template-columns:
+        repeat(auto-fill,minmax(170px,1fr));
+      gap:13px;
+    }
+
+    .photo-card{
+      position:relative;
+      aspect-ratio:1/1;
+      border-radius:16px;
+      overflow:hidden;
+      background:var(--card);
+      border:1px solid var(--border);
+      cursor:pointer;
+      animation:fadeUp .3s ease;
+    }
+
+    .photo-card img{
+      width:100%;
+      height:100%;
+      object-fit:cover;
+      display:block;
+      transition:.3s;
+    }
+
+    .photo-card:hover img{
+      transform:scale(1.04);
+    }
+
+    .photo-overlay{
+      position:absolute;
+      left:0;
+      right:0;
+      bottom:0;
+      padding:25px 9px 9px;
+      background:linear-gradient(
+        transparent,
+        rgba(0,0,0,.8)
+      );
+      opacity:0;
+      transition:.2s;
+    }
+
+    .photo-card:hover .photo-overlay{
+      opacity:1;
+    }
+
+    .photo-name{
+      color:white;
+      font-size:11px;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      margin-bottom:6px;
+    }
+
+    .photo-actions{
+      display:flex;
+      gap:5px;
+    }
+
+    .photo-actions button{
+      flex:1;
+      border:0;
+      border-radius:7px;
+      padding:6px;
+      font-size:11px;
+      background:rgba(255,255,255,.15);
+      color:white;
+      backdrop-filter:blur(8px);
+    }
+
+    .photo-actions .delete{
+      background:rgba(255,77,103,.65);
+    }
+
+    .empty{
+      grid-column:1/-1;
+      padding:50px 20px;
+      text-align:center;
+      color:var(--muted);
+    }
+
+    .empty-icon{
+      font-size:42px;
+      margin-bottom:10px;
+    }
+
+    /* MODAL */
+
+    .modal{
+      position:fixed;
+      inset:0;
+      background:rgba(0,0,0,.65);
+      backdrop-filter:blur(8px);
+      display:none;
+      align-items:center;
+      justify-content:center;
+      padding:18px;
+      z-index:100;
+    }
+
+    .modal.show{
+      display:flex;
+    }
+
+    .modal-box{
+      width:100%;
+      max-width:420px;
+      background:var(--card);
+      border:1px solid var(--border);
+      border-radius:20px;
+      padding:22px;
+      box-shadow:var(--shadow);
+    }
+
+    .modal-box h3{
+      margin-bottom:15px;
+    }
+
+    .modal-actions{
+      display:flex;
+      gap:9px;
+      margin-top:15px;
+    }
+
+    .modal-actions button{
+      flex:1;
+    }
+
+    /* VIEWER */
+
+    .viewer{
+      position:fixed;
+      inset:0;
+      background:rgba(0,0,0,.96);
+      z-index:200;
+      display:none;
+      align-items:center;
+      justify-content:center;
+      overflow:hidden;
+    }
+
+    .viewer.show{
+      display:flex;
+    }
+
+    .viewer img{
+      max-width:92vw;
+      max-height:88vh;
+      object-fit:contain;
+      transition:transform .2s;
+      user-select:none;
+      touch-action:none;
+    }
+
+    .viewer-top{
+      position:absolute;
+      top:15px;
+      left:15px;
+      right:15px;
+      display:flex;
+      justify-content:space-between;
+      z-index:5;
+    }
+
+    .viewer-controls{
+      position:absolute;
+      bottom:20px;
+      left:50%;
+      transform:translateX(-50%);
+      display:flex;
+      gap:8px;
+      z-index:5;
+    }
+
+    .viewer-controls button,
+    .viewer-top button{
+      width:43px;
+      height:43px;
+      border:1px solid rgba(255,255,255,.2);
+      border-radius:12px;
+      background:rgba(30,30,35,.8);
+      color:white;
+      backdrop-filter:blur(10px);
+    }
+
+    /* PROFILE */
+
+    .profile-card{
+      background:var(--card);
+      border:1px solid var(--border);
+      border-radius:18px;
+      padding:20px;
+      margin-top:20px;
+    }
+
+    .profile-card h3{
+      margin-bottom:12px;
+    }
+
+    .profile-row{
+      display:flex;
+      justify-content:space-between;
+      padding:10px 0;
+      border-bottom:1px solid var(--border);
+      font-size:13px;
+    }
+
+    .profile-row:last-child{
+      border-bottom:0;
+    }
+
+    .profile-row span:first-child{
+      color:var(--muted);
+    }
+
+    footer{
+      text-align:center;
+      color:var(--muted);
+      font-size:12px;
+      padding:30px 15px;
+    }
+
+    /* TOAST */
+
+    #toast{
+      position:fixed;
+      left:50%;
+      bottom:25px;
+      transform:
+        translate(-50%,20px);
+      background:#22222b;
+      color:white;
+      padding:12px 17px;
+      border-radius:12px;
+      font-size:13px;
+      opacity:0;
+      pointer-events:none;
+      transition:.25s;
+      z-index:500;
+      border:1px solid #353542;
+    }
+
+    #toast.show{
+      opacity:1;
+      transform:
+        translate(-50%,0);
+    }
+
+    @media(max-width:600px){
+
+      .auth-card{
+        padding:23px 19px;
+        border-radius:20px;
+      }
+
+      .topbar{
+        padding:0 12px;
+      }
+
+      .brand{
+        font-size:14px;
+      }
+
+      .brand-icon{
+        width:34px;
+        height:34px;
+        font-size:17px;
+      }
+
+      .container{
+        padding:20px 12px 40px;
+      }
+
+      .welcome h2{
+        font-size:20px;
+      }
+
+      .stats{
+        gap:8px;
+      }
+
+      .stat{
+        padding:13px;
+      }
+
+      .stat-value{
+        font-size:17px;
+      }
+
+      .gallery{
+        grid-template-columns:
+          repeat(2,minmax(0,1fr));
+        gap:9px;
+      }
+
+      .photo-card{
+        border-radius:12px;
+      }
+
+      .photo-overlay{
+        opacity:1;
+      }
+
+      .toolbar{
+        padding:10px;
+      }
+
+      .select{
+        flex:1;
+      }
+    }
+
+  </style>
+
 </head>
 
 <body>
 
-<!-- ================= AUTH ================= -->
+  <!-- AUTH -->
 
-<div id="authScreen" class="auth-wrap">
+  <section id="auth">
 
-  <!-- LOGIN -->
+    <!-- LOGIN -->
 
-  <div id="loginBox" class="auth-card">
+    <div
+      class="auth-card"
+      id="loginCard"
+    >
 
-    <div class="logo">🔐</div>
-
-    <h1>Private Vault</h1>
-
-    <p class="subtitle">
-      Your private photo storage.
-    </p>
-
-    <div class="field">
-      <label>Email</label>
-      <input
-        id="email"
-        type="email"
-        autocomplete="email"
-        placeholder="Enter your email">
-    </div>
-
-    <div class="field">
-      <label>Password</label>
-      <input
-        id="password"
-        type="password"
-        autocomplete="current-password"
-        placeholder="Enter your password">
-    </div>
-
-    <button class="primary-btn" onclick="login()">
-      Unlock Vault
-    </button>
-
-    <div id="message" class="message"></div>
-
-    <div class="auth-switch">
-      New here?
-      <button class="link-btn" onclick="showSignup()">
-        Create New Account
-      </button>
-    </div>
-
-  </div>
-
-
-  <!-- SIGNUP -->
-
-  <div id="signupBox" class="auth-card hidden">
-
-    <div class="logo">✨</div>
-
-    <h1>Create Account</h1>
-
-    <p class="subtitle">
-      Create your private vault.
-    </p>
-
-    <div class="field">
-      <label>Email</label>
-      <input
-        id="signupEmail"
-        type="email"
-        autocomplete="email"
-        placeholder="Enter your email">
-    </div>
-
-    <div class="field">
-      <label>Password</label>
-      <input
-        id="signupPassword"
-        type="password"
-        autocomplete="new-password"
-        placeholder="Minimum 6 characters">
-    </div>
-
-    <button class="primary-btn" onclick="signup()">
-      Create Account
-    </button>
-
-    <div id="signupMessage" class="message"></div>
-
-    <div class="auth-switch">
-      Already have an account?
-      <button class="link-btn" onclick="showLogin()">
-        Back to Login
-      </button>
-    </div>
-
-  </div>
-
-</div>
-
-
-<!-- ================= APP ================= -->
-
-<div id="app" class="app hidden">
-
-  <header class="topbar">
-
-    <div class="brand">
-      <div class="brand-icon">🔐</div>
-
-      <div>
-        <div class="brand-title">Private Vault</div>
-        <div id="userEmail" class="brand-email"></div>
-      </div>
-    </div>
-
-    <div class="top-actions">
-
-      <button
-        class="icon-btn"
-        title="Theme"
-        onclick="toggleTheme()">
-        🌓
-      </button>
-
-      <button
-        class="icon-btn"
-        title="Profile"
-        onclick="openProfile()">
-        👤
-      </button>
-
-      <button
-        class="icon-btn"
-        title="Logout"
-        onclick="logout()">
-        🚪
-      </button>
-
-    </div>
-
-  </header>
-
-
-  <main class="container">
-
-    <section class="hero">
-
-      <div>
-        <h2>My Photos</h2>
-        <p>Your private gallery</p>
+      <div class="vault-logo">
+        🔐
       </div>
 
-      <button
-        class="upload-btn"
-        onclick="document.getElementById('fileInput').click()">
-        ＋ Upload
-      </button>
+      <h1>
+        Private Photo Storage
+      </h1>
 
-      <input
-        id="fileInput"
-        type="file"
-        accept="image/*"
-        multiple
-        hidden
-        onchange="uploadPhotos(event)">
+      <p class="auth-subtitle">
+        Securely store and manage your private photos.
+      </p>
 
-    </section>
+      <p class="seo-text">
+        Private Photo Storage is a secure personal photo vault
+        designed to help you store, organize and manage your
+        photos online with private user accounts.
+      </p>
 
-
-    <!-- STATS -->
-
-    <section class="stats">
-
-      <div class="stat">
-        <div id="photoCount" class="stat-value">0</div>
-        <div class="stat-label">Photos</div>
-      </div>
-
-      <div class="stat">
-        <div id="storageUsed" class="stat-value">0 MB</div>
-        <div class="stat-label">Storage Used</div>
-      </div>
-
-      <div class="stat">
-        <div id="albumCount" class="stat-value">0</div>
-        <div class="stat-label">Albums</div>
-      </div>
-
-    </section>
-
-
-    <!-- SEARCH / SORT -->
-
-    <section class="toolbar">
-
-      <div class="search-wrap">
-        <span class="search-icon">🔍</span>
+      <div class="field">
+        <label>Email</label>
 
         <input
-          id="searchInput"
-          class="search-box"
-          type="search"
-          placeholder="Search photos..."
-          oninput="renderGallery()">
+          id="email"
+          type="email"
+          placeholder="Enter your email"
+          autocomplete="email"
+        >
       </div>
 
-      <select
-        id="sortSelect"
-        class="album-select"
-        onchange="renderGallery()">
+      <div class="field">
+        <label>Password</label>
 
-        <option value="newest">Newest</option>
-        <option value="oldest">Oldest</option>
-        <option value="az">A → Z</option>
-        <option value="za">Z → A</option>
-
-      </select>
-
-      <button
-        class="secondary-btn"
-        onclick="loadEverything()">
-        ↻ Refresh
-      </button>
-
-    </section>
-
-
-    <!-- ALBUMS -->
-
-    <section id="albumBar" class="album-bar"></section>
-
-
-    <!-- GALLERY -->
-
-    <section id="gallery" class="gallery"></section>
-
-
-    <!-- UPLOAD STATUS -->
-
-    <section
-      id="uploadList"
-      class="upload-list">
-    </section>
-
-
-    <!-- PROFILE -->
-
-    <section
-      id="profilePanel"
-      class="panel hidden">
-
-      <div class="panel-title">
-        Account
-      </div>
-
-      <div class="profile-row">
-        <div class="profile-label">Email</div>
-        <div
-          id="profileEmail"
-          class="profile-value">
-        </div>
-      </div>
-
-      <div class="profile-row">
-        <div class="profile-label">User ID</div>
-        <div
-          id="profileId"
-          class="profile-value">
-        </div>
-      </div>
-
-      <div class="profile-row">
-        <div class="profile-label">Photos</div>
-        <div
-          id="profilePhotos"
-          class="profile-value">
-        </div>
-      </div>
-
-      <div class="profile-row">
-        <div class="profile-label">Storage</div>
-        <div
-          id="profileStorage"
-          class="profile-value">
-        </div>
+        <input
+          id="password"
+          type="password"
+          placeholder="Enter your password"
+          autocomplete="current-password"
+        >
       </div>
 
       <button
-        class="secondary-btn"
-        style="margin-top:15px;width:100%"
-        onclick="logout()">
-        Logout
+        class="primary-btn"
+        onclick="login()"
+      >
+        Unlock Vault
       </button>
 
-    </section>
+      <div
+        class="message"
+        id="message"
+      ></div>
+
+      <div class="auth-switch">
+        Don't have an account?
+        <button onclick="showSignup()">
+          Create Account
+        </button>
+      </div>
+
+    </div>
+
+
+    <!-- SIGNUP -->
+
+    <div
+      class="auth-card hidden"
+      id="signupCard"
+    >
+
+      <div class="vault-logo">
+        🔐
+      </div>
+
+      <h1>
+        Create Your Private Photo Storage
+      </h1>
+
+      <p class="auth-subtitle">
+        Create your secure personal photo vault.
+      </p>
+
+      <div class="field">
+        <label>Email</label>
+
+        <input
+          id="signupEmail"
+          type="email"
+          placeholder="Enter your email"
+          autocomplete="email"
+        >
+      </div>
+
+      <div class="field">
+        <label>Password</label>
+
+        <input
+          id="signupPassword"
+          type="password"
+          placeholder="Minimum 6 characters"
+          autocomplete="new-password"
+        >
+      </div>
+
+      <button
+        class="primary-btn"
+        onclick="signup()"
+      >
+        Create Vault
+      </button>
+
+      <div
+        class="message"
+        id="signupMessage"
+      ></div>
+
+      <div class="auth-switch">
+        Already have an account?
+        <button onclick="showLogin()">
+          Login
+        </button>
+      </div>
+
+    </div>
+
+  </section>
+
+
+  <!-- APP -->
+
+  <section
+    id="app"
+    class="hidden"
+  >
+
+    <header class="topbar">
+
+      <div class="brand">
+
+        <div class="brand-icon">
+          🔐
+        </div>
+
+        <span>
+          Private Photo Storage
+        </span>
+
+      </div>
+
+      <div class="top-actions">
+
+        <button
+          class="icon-btn"
+          onclick="toggleTheme()"
+          title="Toggle theme"
+        >
+          🌓
+        </button>
+
+        <button
+          class="icon-btn"
+          onclick="showProfile()"
+          title="Profile"
+        >
+          👤
+        </button>
+
+        <button
+          class="icon-btn"
+          onclick="logout()"
+          title="Logout"
+        >
+          ↪
+        </button>
+
+      </div>
+
+    </header>
+
+
+    <main class="container">
+
+      <div class="welcome">
+
+        <div>
+
+          <h2>
+            My Private Photos
+          </h2>
+
+          <p id="userEmail">
+            Your personal photo vault
+          </p>
+
+        </div>
+
+      </div>
+
+
+      <!-- STATS -->
+
+      <div class="stats">
+
+        <div class="stat">
+
+          <div class="stat-label">
+            Photos
+          </div>
+
+          <div
+            class="stat-value"
+            id="photoCount"
+          >
+            0
+          </div>
+
+        </div>
+
+        <div class="stat">
+
+          <div class="stat-label">
+            Storage Used
+          </div>
+
+          <div
+            class="stat-value"
+            id="storageUsed"
+          >
+            0 MB
+          </div>
+
+        </div>
+
+        <div class="stat">
+
+          <div class="stat-label">
+            Albums
+          </div>
+
+          <div
+            class="stat-value"
+            id="albumCount"
+          >
+            0
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <!-- TOOLBAR -->
+
+      <div class="toolbar">
+
+        <div class="search">
+
+          <input
+            id="searchInput"
+            type="search"
+            placeholder="Search photos..."
+            oninput="renderGallery()"
+          >
+
+        </div>
+
+        <select
+          id="sortSelect"
+          class="select"
+          onchange="renderGallery()"
+        >
+
+          <option value="newest">
+            Newest
+          </option>
+
+          <option value="oldest">
+            Oldest
+          </option>
+
+          <option value="name">
+            Name
+          </option>
+
+          <option value="size">
+            Size
+          </option>
+
+        </select>
+
+        <button
+          class="small-btn"
+          onclick="createAlbum()"
+        >
+          + Album
+        </button>
+
+      </div>
+
+
+      <!-- ALBUMS -->
+
+      <div
+        class="albums"
+        id="albums"
+      ></div>
+
+
+      <!-- UPLOAD -->
+
+      <div class="upload-area">
+
+        <h3>
+          Add Photos
+        </h3>
+
+        <p>
+          Upload your private photos to your personal vault.
+        </p>
+
+        <label
+          class="upload-btn"
+          for="fileInput"
+        >
+          📷 Choose Photos
+        </label>
+
+        <input
+          id="fileInput"
+          type="file"
+          accept="image/*"
+          multiple
+          onchange="uploadPhotos()"
+        >
+
+        <div
+          class="progress-wrap"
+          id="progressWrap"
+        >
+
+          <div class="progress-bg">
+
+            <div
+              class="progress-bar"
+              id="progressBar"
+            ></div>
+
+          </div>
+
+          <div
+            class="progress-text"
+            id="progressText"
+          >
+            Uploading...
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <!-- GALLERY -->
+
+      <div
+        class="gallery"
+        id="gallery"
+      >
+
+        <div class="empty">
+
+          <div class="empty-icon">
+            🖼️
+          </div>
+
+          No photos yet.
+
+        </div>
+
+      </div>
+
+
+      <!-- PROFILE -->
+
+      <div
+        class="profile-card hidden"
+        id="profileCard"
+      >
+
+        <h3>
+          Account
+        </h3>
+
+        <div class="profile-row">
+
+          <span>
+            Email
+          </span>
+
+          <span id="profileEmail">
+            -
+          </span>
+
+        </div>
+
+        <div class="profile-row">
+
+          <span>
+            Photos
+          </span>
+
+          <span id="profilePhotos">
+            0
+          </span>
+
+        </div>
+
+        <div class="profile-row">
+
+          <span>
+            Storage
+          </span>
+
+          <span id="profileStorage">
+            0 MB
+          </span>
+
+        </div>
+
+        <div class="profile-row">
+
+          <span>
+            Account Status
+          </span>
+
+          <span>
+            Active
+          </span>
+
+        </div>
+
+      </div>
+
+    </main>
 
 
     <footer>
-      Page created by Prince
+      Private Photo Storage · Page created by Prince
     </footer>
 
-  </main>
-
-</div>
+  </section>
 
 
-<!-- ================= ALBUM MODAL ================= -->
+  <!-- ALBUM MODAL -->
 
-<div id="albumModal" class="modal">
+  <div
+    class="modal"
+    id="albumModal"
+  >
 
-  <div class="modal-card">
+    <div class="modal-box">
 
-    <div class="modal-head">
+      <h3>
+        Create Album
+      </h3>
 
-      <h3>Albums</h3>
+      <div class="field">
 
-      <button
-        class="icon-btn"
-        onclick="closeAlbumModal()">
-        ✕
-      </button>
+        <label>
+          Album name
+        </label>
 
-    </div>
+        <input
+          id="albumName"
+          type="text"
+          placeholder="e.g. Family"
+        >
 
-    <div class="field">
+      </div>
 
-      <label>New album name</label>
+      <div class="modal-actions">
 
-      <input
-        id="albumName"
-        placeholder="e.g. Family, Travel...">
+        <button
+          class="small-btn"
+          onclick="closeAlbumModal()"
+        >
+          Cancel
+        </button>
 
-    </div>
+        <button
+          class="primary-btn"
+          onclick="saveAlbum()"
+        >
+          Create
+        </button>
 
-    <button
-      class="primary-btn"
-      onclick="createAlbum()">
-      Create Album
-    </button>
+      </div>
 
-    <div
-      id="albumModalList"
-      style="margin-top:15px">
     </div>
 
   </div>
 
-</div>
 
+  <!-- IMAGE VIEWER -->
 
-<!-- ================= VIEWER ================= -->
+  <div
+    class="viewer"
+    id="viewer"
+  >
 
-<div id="viewer" class="viewer">
+    <div class="viewer-top">
 
-  <div class="viewer-top">
-
-    <div
-      id="viewerTitle"
-      class="viewer-title">
-    </div>
-
-    <div class="viewer-actions">
-
-      <button
-        class="viewer-btn"
-        onclick="zoomOut()">
-        −
+      <button onclick="closeViewer()">
+        ✕
       </button>
 
-      <button
-        class="viewer-btn"
-        onclick="resetZoom()">
-        1×
-      </button>
-
-      <button
-        class="viewer-btn"
-        onclick="zoomIn()">
-        ＋
-      </button>
-
-      <button
-        class="viewer-btn"
-        onclick="downloadCurrent()">
+      <button onclick="downloadCurrentPhoto()">
         ↓
       </button>
 
-      <button
-        class="viewer-btn"
-        onclick="closeViewer()">
-        ✕
-      </button>
-
     </div>
-
-  </div>
-
-  <div
-    id="viewerBody"
-    class="viewer-body">
 
     <img
       id="viewerImage"
       src=""
-      alt="Photo">
+      alt="Private photo"
+    >
+
+    <div class="viewer-controls">
+
+      <button onclick="zoomOut()">
+        −
+      </button>
+
+      <button onclick="resetZoom()">
+        100%
+      </button>
+
+      <button onclick="zoomIn()">
+        +
+      </button>
+
+      <button onclick="toggleFullscreen()">
+        ⛶
+      </button>
+
+    </div>
 
   </div>
 
-</div>
 
+  <!-- TOAST -->
 
-<!-- ================= TOAST ================= -->
-
-<div
-  id="toastContainer"
-  class="toast-container">
-</div>
+  <div id="toast"></div>
 
 
 <script>
 
-/* =====================================================
-   SUPABASE
-===================================================== */
+  /* SUPABASE */
 
-const SUPABASE_URL =
-  "https://woyvvkyckiwougcqvgno.supabase.co";
+  const SUPABASE_URL =
+    "https://woyvvkyckiwougcqvgno.supabase.co";
 
-const SUPABASE_KEY =
-  "sb_publishable_GiAZ68Ta1ypJwyqxi_m3GA_lnVUVK5W";
+  const SUPABASE_KEY =
+    "sb_publishable_GiAZ68Ta1ypJwyqxi_m3GA_lnVUVK5W";
 
-const supabaseClient =
-  window.supabase.createClient(
-    SUPABASE_URL,
-    SUPABASE_KEY
-  );
+  const supabaseClient =
+    window.supabase.createClient(
+      SUPABASE_URL,
+      SUPABASE_KEY
+    );
 
 
-/* =====================================================
-   GLOBAL STATE
-===================================================== */
+  /* GLOBAL STATE */
 
-let currentUser = null;
+  let currentUser = null;
 
-let photos = [];
+  let photos = [];
 
-let albums = [];
+  let albums = [];
 
-let activeAlbum = "all";
+  let selectedAlbum = "all";
 
-let currentViewerPhoto = null;
+  let currentViewerPhoto = null;
 
-let zoomLevel = 1;
-
-let inactivityTimer = null;
-
-const AUTO_LOGOUT_MS = 30 * 60 * 1000;
+  let zoomLevel = 1;
 
 
-/* =====================================================
-   HELPERS
-===================================================== */
+  /* ELEMENT HELPERS */
 
-function toast(message){
-
-  const container =
-    document.getElementById("toastContainer");
-
-  const item =
-    document.createElement("div");
-
-  item.className = "toast";
-
-  item.textContent = message;
-
-  container.appendChild(item);
-
-  setTimeout(() => {
-    item.remove();
-  }, 3000);
-}
+  const $ = id =>
+    document.getElementById(id);
 
 
-function formatBytes(bytes){
+  /* TOAST */
 
-  if (!bytes || bytes <= 0){
-    return "0 MB";
+  let toastTimer;
+
+  function toast(message){
+
+    const el = $("toast");
+
+    el.textContent = message;
+
+    el.classList.add("show");
+
+    clearTimeout(toastTimer);
+
+    toastTimer =
+      setTimeout(() => {
+        el.classList.remove("show");
+      }, 2500);
   }
 
-  const mb =
-    bytes / (1024 * 1024);
 
-  if (mb < 1024){
-    return mb.toFixed(1) + " MB";
+  /* AUTH SCREENS */
+
+  function showSignup(){
+
+    $("loginCard")
+      .classList.add("hidden");
+
+    $("signupCard")
+      .classList.remove("hidden");
+
   }
 
-  return (mb / 1024).toFixed(2) + " GB";
-}
+
+  function showLogin(){
+
+    $("signupCard")
+      .classList.add("hidden");
+
+    $("loginCard")
+      .classList.remove("hidden");
+
+  }
 
 
-function escapeHTML(value){
+  /* SIGNUP */
 
-  return String(value)
-    .replaceAll("&","&amp;")
-    .replaceAll("<","&lt;")
-    .replaceAll(">","&gt;")
-    .replaceAll('"',"&quot;")
-    .replaceAll("'","&#039;");
-}
+  async function signup(){
 
+    const email =
+      $("signupEmail")
+        .value
+        .trim();
 
-/* =====================================================
-   AUTH UI
-===================================================== */
+    const password =
+      $("signupPassword")
+        .value;
 
-function showSignup(){
+    const message =
+      $("signupMessage");
 
-  document
-    .getElementById("loginBox")
-    .classList.add("hidden");
+    if (!email || !password){
 
-  document
-    .getElementById("signupBox")
-    .classList.remove("hidden");
+      message.textContent =
+        "Enter email and password.";
 
-  document
-    .getElementById("signupMessage")
-    .textContent = "";
-}
+      return;
+    }
 
+    if (password.length < 6){
 
-function showLogin(){
+      message.textContent =
+        "Password must be at least 6 characters.";
 
-  document
-    .getElementById("signupBox")
-    .classList.add("hidden");
-
-  document
-    .getElementById("loginBox")
-    .classList.remove("hidden");
-
-  document
-    .getElementById("message")
-    .textContent = "";
-}
-
-
-/* =====================================================
-   SIGN UP
-===================================================== */
-
-async function signup(){
-
-  const email =
-    document
-      .getElementById("signupEmail")
-      .value
-      .trim();
-
-  const password =
-    document
-      .getElementById("signupPassword")
-      .value;
-
-  const message =
-    document
-      .getElementById("signupMessage");
-
-  if (!email || !password){
+      return;
+    }
 
     message.textContent =
-      "Enter email and password.";
+      "Creating account...";
 
-    return;
-  }
-
-  if (password.length < 6){
-
-    message.textContent =
-      "Password must be at least 6 characters.";
-
-    return;
-  }
-
-  message.textContent =
-    "Creating account...";
-
-  const {
-    data,
-    error
-  } =
-    await supabaseClient.auth.signUp({
-      email,
-      password
-    });
-
-  if (error){
-
-    message.textContent =
-      error.message;
-
-    return;
-  }
-
-  if (data.session){
-
-    currentUser =
-      data.session.user;
-
-    await enterApp();
-
-  }else{
-
-    message.textContent =
-      "Account created. Check your email if verification is required.";
-
-    toast("Account created");
-
-  }
-}
-
-
-/* =====================================================
-   LOGIN
-===================================================== */
-
-async function login(){
-
-  const email =
-    document
-      .getElementById("email")
-      .value
-      .trim();
-
-  const password =
-    document
-      .getElementById("password")
-      .value;
-
-  const message =
-    document
-      .getElementById("message");
-
-  if (!email || !password){
-
-    message.textContent =
-      "Enter email and password.";
-
-    return;
-  }
-
-  message.textContent =
-    "Unlocking...";
-
-  const {
-    data,
-    error
-  } =
-    await supabaseClient.auth
-      .signInWithPassword({
+    const {
+      data,
+      error
+    } =
+      await supabaseClient.auth.signUp({
         email,
         password
       });
 
-  if (error){
+    if (error){
 
-    message.textContent =
-      error.message;
+      message.textContent =
+        error.message;
 
-    return;
+      return;
+    }
+
+    if (data.session){
+
+      currentUser =
+        data.session.user;
+
+      await enterApp();
+
+    }else{
+
+      message.textContent =
+        "Account created. Check your email if verification is required.";
+
+      toast("Account created");
+
+    }
+
   }
 
-  currentUser =
-    data.user;
 
-  await enterApp();
-}
+  /* LOGIN */
 
+  async function login(){
 
-/* =====================================================
-   ENTER APP
-===================================================== */
+    const email =
+      $("email")
+        .value
+        .trim();
 
-async function enterApp(){
+    const password =
+      $("password")
+        .value;
 
-  document
-    .getElementById("authScreen")
-    .classList.add("hidden");
+    const message =
+      $("message");
 
-  document
-    .getElementById("app")
-    .classList.remove("hidden");
+    if (!email || !password){
 
-  document
-    .getElementById("userEmail")
-    .textContent =
-      currentUser.email || "";
+      message.textContent =
+        "Enter email and password.";
 
-  document
-    .getElementById("profileEmail")
-    .textContent =
-      currentUser.email || "";
+      return;
+    }
 
-  document
-    .getElementById("profileId")
-    .textContent =
-      currentUser.id;
+    message.textContent =
+      "Unlocking...";
 
-  resetInactivityTimer();
+    const {
+      data,
+      error
+    } =
+      await supabaseClient.auth
+        .signInWithPassword({
+          email,
+          password
+        });
 
-  await loadEverything();
-}
+    if (error){
 
+      message.textContent =
+        error.message;
 
-/* =====================================================
-   LOGOUT
-===================================================== */
-
-async function logout(){
-
-  await supabaseClient.auth.signOut();
-
-  currentUser = null;
-
-  photos = [];
-
-  albums = [];
-
-  document
-    .getElementById("app")
-    .classList.add("hidden");
-
-  document
-    .getElementById("authScreen")
-    .classList.remove("hidden");
-
-  document
-    .getElementById("profilePanel")
-    .classList.add("hidden");
-
-  toast("Logged out");
-
-  showLogin();
-}
-
-
-/* =====================================================
-   SESSION CHECK
-===================================================== */
-
-async function checkSession(){
-
-  const {
-    data
-  } =
-    await supabaseClient.auth
-      .getSession();
-
-  if (data.session){
+      return;
+    }
 
     currentUser =
-      data.session.user;
+      data.user;
 
     await enterApp();
 
   }
-}
 
 
-/* =====================================================
-   LOAD EVERYTHING
-===================================================== */
+  /* LOGOUT */
 
-async function loadEverything(){
+  async function logout(){
 
-  if (!currentUser){
-    return;
+    await supabaseClient.auth.signOut();
+
+    currentUser = null;
+
+    photos = [];
+
+    albums = [];
+
+    $("app")
+      .classList.add("hidden");
+
+    $("auth")
+      .classList.remove("hidden");
+
+    showLogin();
+
+    toast("Logged out");
+
   }
 
-  await Promise.all([
-    loadAlbums(),
-    loadPhotos()
-  ]);
 
-  updateStats();
-}
+  /* ENTER APP */
 
+  async function enterApp(){
 
-/* =====================================================
-   LOAD ALBUMS
-===================================================== */
+    $("auth")
+      .classList.add("hidden");
 
-async function loadAlbums(){
+    $("app")
+      .classList.remove("hidden");
 
-  const {
-    data,
-    error
-  } =
-    await supabaseClient
-      .from("albums")
-      .select("*")
-      .eq("user_id", currentUser.id)
-      .order("created_at", {
-        ascending:false
-      });
+    $("userEmail")
+      .textContent =
+      currentUser.email;
 
-  if (error){
+    $("profileEmail")
+      .textContent =
+      currentUser.email;
 
-    console.error(error);
+    await loadAlbums();
 
-    return;
+    await loadPhotos();
+
   }
 
-  albums = data || [];
 
-  renderAlbums();
-}
+  /* AUTH STATE */
 
+  supabaseClient.auth
+    .getSession()
+    .then(async ({data}) => {
 
-/* =====================================================
-   CREATE ALBUM
-===================================================== */
+      if(data.session){
 
-async function createAlbum(){
+        currentUser =
+          data.session.user;
 
-  const input =
-    document.getElementById("albumName");
+        await enterApp();
 
-  const name =
-    input.value.trim();
+      }
 
-  if (!name){
-
-    toast("Enter an album name");
-
-    return;
-  }
-
-  const {
-    error
-  } =
-    await supabaseClient
-      .from("albums")
-      .insert({
-        user_id:currentUser.id,
-        name:name
-      });
-
-  if (error){
-
-    toast(error.message);
-
-    return;
-  }
-
-  input.value = "";
-
-  toast("Album created");
-
-  await loadAlbums();
-
-  closeAlbumModal();
-}
+    });
 
 
-/* =====================================================
-   RENDER ALBUMS
-===================================================== */
+  supabaseClient.auth
+    .onAuthStateChange(
+      async (event, session) => {
 
-function renderAlbums(){
+        if(
+          event === "SIGNED_IN" &&
+          session
+        ){
 
-  const bar =
-    document.getElementById("albumBar");
+          currentUser =
+            session.user;
 
-  let html = `
-    <button
-      class="album-chip ${activeAlbum === "all" ? "active":""}"
-      onclick="selectAlbum('all')">
-      All Photos
-    </button>
-  `;
+        }
 
-  for (const album of albums){
+      }
+    );
 
-    html += `
-      <button
-        class="album-chip ${activeAlbum === album.id ? "active":""}"
-        onclick="selectAlbum('${album.id}')">
-        📁 ${escapeHTML(album.name)}
-      </button>
-    `;
-  }
 
-  html += `
-    <button
-      class="album-chip"
-      onclick="openAlbumModal()">
-      ＋ Album
-    </button>
-  `;
+  /* LOAD ALBUMS */
 
-  bar.innerHTML = html;
+  async function loadAlbums(){
 
-  document
-    .getElementById("albumCount")
-    .textContent =
+    if(!currentUser)
+      return;
+
+    const {
+      data,
+      error
+    } =
+      await supabaseClient
+        .from("albums")
+        .select("*")
+        .eq(
+          "user_id",
+          currentUser.id
+        )
+        .order(
+          "created_at",
+          {ascending:true}
+        );
+
+    if(error){
+
+      console.error(error);
+
+      return;
+    }
+
+    albums =
+      data || [];
+
+    $("albumCount")
+      .textContent =
       albums.length;
-}
 
+    renderAlbums();
 
-function selectAlbum(id){
-
-  activeAlbum = id;
-
-  renderAlbums();
-
-  renderGallery();
-}
-
-
-/* =====================================================
-   LOAD PHOTOS
-===================================================== */
-
-async function loadPhotos(){
-
-  const {
-    data,
-    error
-  } =
-    await supabaseClient
-      .from("photo_metadata")
-      .select(`
-        id,
-        path,
-        file_name,
-        album_id,
-        file_size,
-        created_at
-      `)
-      .eq("user_id", currentUser.id)
-      .order("created_at", {
-        ascending:false
-      });
-
-  if (error){
-
-    console.error(error);
-
-    toast("Could not load photos");
-
-    return;
   }
 
-  photos = data || [];
 
-  for (const photo of photos){
+  /* RENDER ALBUMS */
 
-    const {
-      data:urlData
-    } =
-      await supabaseClient
-        .storage
-        .from("photos")
-        .createSignedUrl(
-          photo.path,
-          3600
-        );
+  function renderAlbums(){
 
-    photo.url =
-      urlData?.signedUrl || "";
-  }
+    const container =
+      $("albums");
 
-  renderGallery();
+    container.innerHTML = "";
 
-  updateStats();
-}
+    const all =
+      document.createElement("button");
 
-
-/* =====================================================
-   UPLOAD PHOTOS
-===================================================== */
-
-async function uploadPhotos(event){
-
-  const files =
-    Array.from(event.target.files || []);
-
-  event.target.value = "";
-
-  if (!files.length){
-    return;
-  }
-
-  if (!currentUser){
-    toast("Please login again");
-    return;
-  }
-
-  const uploadList =
-    document.getElementById("uploadList");
-
-  uploadList.innerHTML = "";
-
-  for (const file of files){
-
-    const item =
-      document.createElement("div");
-
-    item.className =
-      "upload-item";
-
-    item.innerHTML = `
-      <div>📷</div>
-      <div class="upload-name">
-        ${escapeHTML(file.name)}
-      </div>
-      <div class="upload-status">
-        Uploading...
-      </div>
-    `;
-
-    uploadList.appendChild(item);
-
-    const status =
-      item.querySelector(".upload-status");
-
-    const safeName =
-      file.name
-        .replace(/[^a-zA-Z0-9._-]/g,"_");
-
-    const fileName =
-      Date.now() +
-      "-" +
-      Math.random()
-        .toString(36)
-        .substring(2) +
-      "-" +
-      safeName;
-
-    const path =
-      currentUser.id +
-      "/" +
-      fileName;
-
-    const {
-      error:uploadError
-    } =
-      await supabaseClient
-        .storage
-        .from("photos")
-        .upload(
-          path,
-          file,
-          {
-            cacheControl:"3600",
-            upsert:false
-          }
-        );
-
-    if (uploadError){
-
-      status.textContent =
-        "Failed";
-
-      toast(
-        file.name +
-        ": " +
-        uploadError.message
+    all.className =
+      "album-btn " +
+      (
+        selectedAlbum === "all"
+          ? "active"
+          : ""
       );
 
-      continue;
+    all.textContent =
+      "All Photos";
+
+    all.onclick = () => {
+
+      selectedAlbum =
+        "all";
+
+      renderAlbums();
+
+      renderGallery();
+
+    };
+
+    container.appendChild(all);
+
+
+    albums.forEach(album => {
+
+      const button =
+        document.createElement("button");
+
+      button.className =
+        "album-btn " +
+        (
+          selectedAlbum === album.id
+            ? "active"
+            : ""
+        );
+
+      button.textContent =
+        album.name;
+
+      button.onclick = () => {
+
+        selectedAlbum =
+          album.id;
+
+        renderAlbums();
+
+        renderGallery();
+
+      };
+
+      container.appendChild(button);
+
+    });
+
+  }
+
+
+  /* CREATE ALBUM */
+
+  function createAlbum(){
+
+    $("albumName").value = "";
+
+    $("albumModal")
+      .classList.add("show");
+
+    setTimeout(() => {
+
+      $("albumName").focus();
+
+    },100);
+
+  }
+
+
+  function closeAlbumModal(){
+
+    $("albumModal")
+      .classList.remove("show");
+
+  }
+
+
+  async function saveAlbum(){
+
+    const name =
+      $("albumName")
+        .value
+        .trim();
+
+    if(!name){
+
+      toast("Enter an album name");
+
+      return;
     }
 
     const {
-      error:dbError
+      data,
+      error
+    } =
+      await supabaseClient
+        .from("albums")
+        .insert({
+          user_id:
+            currentUser.id,
+          name
+        })
+        .select()
+        .single();
+
+    if(error){
+
+      toast(error.message);
+
+      return;
+    }
+
+    albums.push(data);
+
+    $("albumCount")
+      .textContent =
+      albums.length;
+
+    closeAlbumModal();
+
+    renderAlbums();
+
+    toast("Album created");
+
+  }
+
+
+  /* LOAD PHOTOS */
+
+  async function loadPhotos(){
+
+    if(!currentUser)
+      return;
+
+    const {
+      data,
+      error
     } =
       await supabaseClient
         .from("photo_metadata")
-        .insert({
-          user_id:currentUser.id,
-          path:path,
-          file_name:file.name,
-          album_id:
-            activeAlbum !== "all"
-              ? activeAlbum
-              : null,
-          file_size:file.size
-        });
+        .select("*")
+        .eq(
+          "user_id",
+          currentUser.id
+        )
+        .order(
+          "created_at",
+          {ascending:false}
+        );
 
-    if (dbError){
+    if(error){
 
-      status.textContent =
-        "Database error";
+      console.error(error);
 
-      toast(dbError.message);
+      toast(error.message);
 
-      continue;
+      return;
     }
 
-    status.textContent =
-      "Uploaded ✓";
+    photos =
+      data || [];
+
+    $("photoCount")
+      .textContent =
+      photos.length;
+
+    updateStorage();
+
+    renderGallery();
+
   }
 
-  toast(
-    files.length +
-    (files.length === 1
-      ? " photo uploaded"
-      : " photos uploaded")
-  );
 
-  await loadPhotos();
+  /* STORAGE */
 
-  setTimeout(() => {
-    uploadList.innerHTML = "";
-  },2500);
-}
+  function updateStorage(){
 
-
-/* =====================================================
-   RENDER GALLERY
-===================================================== */
-
-function renderGallery(){
-
-  const gallery =
-    document.getElementById("gallery");
-
-  let result =
-    [...photos];
-
-  const search =
-    document
-      .getElementById("searchInput")
-      .value
-      .trim()
-      .toLowerCase();
-
-  if (activeAlbum !== "all"){
-
-    result =
-      result.filter(
-        p => p.album_id === activeAlbum
+    const total =
+      photos.reduce(
+        (sum,p) =>
+          sum +
+          Number(p.file_size || 0),
+        0
       );
+
+    const mb =
+      total /
+      1024 /
+      1024;
+
+    const formatted =
+      mb < 1
+        ? total / 1024 + " KB"
+        : mb.toFixed(2) + " MB";
+
+    $("storageUsed")
+      .textContent =
+      formatted;
+
+    $("profilePhotos")
+      .textContent =
+      photos.length;
+
+    $("profileStorage")
+      .textContent =
+      formatted;
+
   }
 
-  if (search){
 
-    result =
-      result.filter(
-        p =>
-          p.file_name
-            .toLowerCase()
-            .includes(search)
+  /* UPLOAD */
+
+  async function uploadPhotos(){
+
+    const input =
+      $("fileInput");
+
+    const files =
+      Array.from(
+        input.files || []
       );
+
+    if(!files.length)
+      return;
+
+    if(!currentUser){
+
+      toast("Please login first");
+
+      return;
+    }
+
+    const wrap =
+      $("progressWrap");
+
+    const bar =
+      $("progressBar");
+
+    const text =
+      $("progressText");
+
+    wrap.style.display =
+      "block";
+
+    let completed = 0;
+
+    for(const file of files){
+
+      try{
+
+        const safeName =
+          file.name
+            .replace(
+              /[^a-zA-Z0-9._-]/g,
+              "_"
+            );
+
+        const uniqueName =
+          Date.now() +
+          "_" +
+          Math.random()
+            .toString(36)
+            .slice(2,8) +
+          "_" +
+          safeName;
+
+        const path =
+          currentUser.id +
+          "/" +
+          uniqueName;
+
+        text.textContent =
+          "Uploading " +
+          (completed + 1) +
+          " of " +
+          files.length +
+          "...";
+
+        const {
+          error:uploadError
+        } =
+          await supabaseClient
+            .storage
+            .from("photos")
+            .upload(
+              path,
+              file,
+              {
+                cacheControl:"3600",
+                upsert:false
+              }
+            );
+
+        if(uploadError){
+
+          console.error(uploadError);
+
+          toast(
+            "Upload failed: " +
+            uploadError.message
+          );
+
+          continue;
+        }
+
+        const {
+          error:metadataError
+        } =
+          await supabaseClient
+            .from("photo_metadata")
+            .insert({
+              user_id:
+                currentUser.id,
+              path,
+              file_name:
+                file.name,
+              file_size:
+                file.size,
+              album_id:
+                selectedAlbum === "all"
+                  ? null
+                  : selectedAlbum
+            });
+
+        if(metadataError){
+
+          console.error(metadataError);
+
+          await supabaseClient
+            .storage
+            .from("photos")
+            .remove([path]);
+
+          toast(
+            "Photo record failed: " +
+            metadataError.message
+          );
+
+          continue;
+        }
+
+        completed++;
+
+        bar.style.width =
+          (
+            completed /
+            files.length *
+            100
+          ) + "%";
+
+      }catch(error){
+
+        console.error(error);
+
+        toast("Something went wrong");
+
+      }
+
+    }
+
+    input.value = "";
+
+    await loadPhotos();
+
+    text.textContent =
+      completed +
+      " photo(s) uploaded.";
+
+    setTimeout(() => {
+
+      wrap.style.display =
+        "none";
+
+      bar.style.width =
+        "0%";
+
+    },1800);
+
+    if(completed > 0)
+      toast(
+        completed +
+        " photo(s) uploaded"
+      );
+
   }
 
-  const sort =
-    document
-      .getElementById("sortSelect")
-      .value;
 
-  if (sort === "newest"){
+  /* SIGNED URL */
 
-    result.sort(
-      (a,b) =>
-        new Date(b.created_at) -
-        new Date(a.created_at)
-    );
-
-  }else if(sort === "oldest"){
-
-    result.sort(
-      (a,b) =>
-        new Date(a.created_at) -
-        new Date(b.created_at)
-    );
-
-  }else if(sort === "az"){
-
-    result.sort(
-      (a,b) =>
-        a.file_name
-          .localeCompare(b.file_name)
-    );
-
-  }else if(sort === "za"){
-
-    result.sort(
-      (a,b) =>
-        b.file_name
-          .localeCompare(a.file_name)
-    );
-  }
-
-  if (!result.length){
-
-    gallery.innerHTML = `
-      <div class="empty"
-           style="grid-column:1/-1">
-
-        <div class="empty-icon">🖼️</div>
-
-        <div>No photos found</div>
-
-        <div style="font-size:12px;margin-top:5px">
-          Upload some photos to get started.
-        </div>
-
-      </div>
-    `;
-
-    return;
-  }
-
-  gallery.innerHTML =
-    result.map(
-      (photo,index) => `
-
-      <div class="photo">
-
-        <img
-          src="${photo.url}"
-          alt="${escapeHTML(photo.file_name)}"
-          loading="lazy"
-          onclick="openViewer('${photo.id}')">
-
-        <div class="photo-actions">
-
-          <button
-            title="Download"
-            onclick="event.stopPropagation();downloadPhoto('${photo.id}')">
-            ↓
-          </button>
-
-          <button
-            title="Delete"
-            onclick="event.stopPropagation();deletePhoto('${photo.id}')">
-            🗑
-          </button>
-
-        </div>
-
-      </div>
-    `
-    ).join("");
-}
-
-
-/* =====================================================
-   DELETE PHOTO
-===================================================== */
-
-async function deletePhoto(id){
-
-  const photo =
-    photos.find(
-      p => p.id === id
-    );
-
-  if (!photo){
-    return;
-  }
-
-  const confirmed =
-    confirm(
-      "Delete this photo permanently?"
-    );
-
-  if (!confirmed){
-    return;
-  }
-
-  const {
-    error:storageError
-  } =
-    await supabaseClient
-      .storage
-      .from("photos")
-      .remove([
-        photo.path
-      ]);
-
-  if (storageError){
-
-    toast(
-      "Storage delete failed: " +
-      storageError.message
-    );
-
-    return;
-  }
-
-  const {
-    error:dbError
-  } =
-    await supabaseClient
-      .from("photo_metadata")
-      .delete()
-      .eq("id",id)
-      .eq("user_id",currentUser.id);
-
-  if (dbError){
-
-    toast(dbError.message);
-
-    return;
-  }
-
-  toast("Photo deleted");
-
-  await loadPhotos();
-}
-
-
-/* =====================================================
-   DOWNLOAD
-===================================================== */
-
-async function downloadPhoto(id){
-
-  const photo =
-    photos.find(
-      p => p.id === id
-    );
-
-  if (!photo){
-    return;
-  }
-
-  try{
+  async function getPhotoUrl(path){
 
     const {
       data,
@@ -2045,485 +2193,665 @@ async function downloadPhoto(id){
       await supabaseClient
         .storage
         .from("photos")
-        .download(photo.path);
-
-    if (error){
-      throw error;
-    }
-
-    const url =
-      URL.createObjectURL(data);
-
-    const a =
-      document.createElement("a");
-
-    a.href = url;
-
-    a.download =
-      photo.file_name;
-
-    document.body.appendChild(a);
-
-    a.click();
-
-    a.remove();
-
-    URL.revokeObjectURL(url);
-
-    toast("Download started");
-
-  }catch(error){
-
-    toast(error.message);
-  }
-}
-
-
-/* =====================================================
-   VIEWER
-===================================================== */
-
-function openViewer(id){
-
-  const photo =
-    photos.find(
-      p => p.id === id
-    );
-
-  if (!photo){
-    return;
-  }
-
-  currentViewerPhoto =
-    photo;
-
-  zoomLevel = 1;
-
-  const image =
-    document.getElementById("viewerImage");
-
-  image.src =
-    photo.url;
-
-  image.style.transform =
-    "scale(1)";
-
-  document
-    .getElementById("viewerTitle")
-    .textContent =
-      photo.file_name;
-
-  document
-    .getElementById("viewer")
-    .classList.add("show");
-}
-
-
-function closeViewer(){
-
-  document
-    .getElementById("viewer")
-    .classList.remove("show");
-
-  currentViewerPhoto = null;
-}
-
-
-function zoomIn(){
-
-  zoomLevel =
-    Math.min(
-      zoomLevel + .25,
-      4
-    );
-
-  updateZoom();
-}
-
-
-function zoomOut(){
-
-  zoomLevel =
-    Math.max(
-      zoomLevel - .25,
-      .5
-    );
-
-  updateZoom();
-}
-
-
-function resetZoom(){
-
-  zoomLevel = 1;
-
-  updateZoom();
-}
-
-
-function updateZoom(){
-
-  document
-    .getElementById("viewerImage")
-    .style.transform =
-      `scale(${zoomLevel})`;
-}
-
-
-function downloadCurrent(){
-
-  if (currentViewerPhoto){
-    downloadPhoto(
-      currentViewerPhoto.id
-    );
-  }
-}
-
-
-/* =====================================================
-   ALBUM MODAL
-===================================================== */
-
-function openAlbumModal(){
-
-  document
-    .getElementById("albumModal")
-    .classList.add("show");
-
-  renderAlbumModal();
-}
-
-
-function closeAlbumModal(){
-
-  document
-    .getElementById("albumModal")
-    .classList.remove("show");
-}
-
-
-function renderAlbumModal(){
-
-  const list =
-    document
-      .getElementById("albumModalList");
-
-  if (!albums.length){
-
-    list.innerHTML =
-      `<div style="color:var(--muted)">
-        No albums yet.
-      </div>`;
-
-    return;
-  }
-
-  list.innerHTML =
-    albums.map(
-      album => `
-
-      <div class="profile-row">
-
-        <div>
-          📁 ${escapeHTML(album.name)}
-        </div>
-
-        <button
-          class="secondary-btn"
-          onclick="deleteAlbum('${album.id}')">
-          Delete
-        </button>
-
-      </div>
-    `
-    ).join("");
-}
-
-
-async function deleteAlbum(id){
-
-  const confirmed =
-    confirm(
-      "Delete this album? Photos will not be deleted."
-    );
-
-  if (!confirmed){
-    return;
-  }
-
-  const {
-    error
-  } =
-    await supabaseClient
-      .from("albums")
-      .delete()
-      .eq("id",id)
-      .eq("user_id",currentUser.id);
-
-  if (error){
-
-    toast(error.message);
-
-    return;
-  }
-
-  if (activeAlbum === id){
-    activeAlbum = "all";
-  }
-
-  toast("Album deleted");
-
-  await loadAlbums();
-
-  await loadPhotos();
-
-  renderAlbumModal();
-}
-
-
-/* =====================================================
-   STATS
-===================================================== */
-
-function updateStats(){
-
-  const total =
-    photos.reduce(
-      (sum,p) =>
-        sum +
-        Number(p.file_size || 0),
-      0
-    );
-
-  document
-    .getElementById("photoCount")
-    .textContent =
-      photos.length;
-
-  document
-    .getElementById("storageUsed")
-    .textContent =
-      formatBytes(total);
-
-  document
-    .getElementById("profilePhotos")
-    .textContent =
-      photos.length;
-
-  document
-    .getElementById("profileStorage")
-    .textContent =
-      formatBytes(total);
-}
-
-
-/* =====================================================
-   PROFILE
-===================================================== */
-
-function openProfile(){
-
-  const panel =
-    document
-      .getElementById("profilePanel");
-
-  panel.classList.toggle("hidden");
-
-  if (!panel.classList.contains("hidden")){
-
-    panel.scrollIntoView({
-      behavior:"smooth"
-    });
-  }
-}
-
-
-/* =====================================================
-   THEME
-===================================================== */
-
-function toggleTheme(){
-
-  document
-    .body
-    .classList
-    .toggle("light");
-
-  const mode =
-    document.body.classList.contains("light")
-      ? "light"
-      : "dark";
-
-  localStorage.setItem(
-    "vault-theme",
-    mode
-  );
-}
-
-
-function loadTheme(){
-
-  const mode =
-    localStorage.getItem(
-      "vault-theme"
-    );
-
-  if (mode === "light"){
-
-    document
-      .body
-      .classList
-      .add("light");
-  }
-}
-
-
-/* =====================================================
-   AUTO LOGOUT
-===================================================== */
-
-function resetInactivityTimer(){
-
-  clearTimeout(
-    inactivityTimer
-  );
-
-  if (!currentUser){
-    return;
-  }
-
-  inactivityTimer =
-    setTimeout(
-      async () => {
-
-        toast(
-          "Logged out due to inactivity."
+        .createSignedUrl(
+          path,
+          3600
         );
 
-        await logout();
+    if(error){
 
-      },
-      AUTO_LOGOUT_MS
+      console.error(error);
+
+      return null;
+    }
+
+    return data.signedUrl;
+
+  }
+
+
+  /* RENDER GALLERY */
+
+  async function renderGallery(){
+
+    const gallery =
+      $("gallery");
+
+    let filtered =
+      [...photos];
+
+    const search =
+      $("searchInput")
+        .value
+        .trim()
+        .toLowerCase();
+
+    const sort =
+      $("sortSelect")
+        .value;
+
+    if(selectedAlbum !== "all"){
+
+      filtered =
+        filtered.filter(
+          p =>
+            p.album_id ===
+            selectedAlbum
+        );
+
+    }
+
+    if(search){
+
+      filtered =
+        filtered.filter(
+          p =>
+            p.file_name
+              .toLowerCase()
+              .includes(search)
+        );
+
+    }
+
+    if(sort === "newest"){
+
+      filtered.sort(
+        (a,b) =>
+          new Date(b.created_at) -
+          new Date(a.created_at)
+      );
+
+    }else if(sort === "oldest"){
+
+      filtered.sort(
+        (a,b) =>
+          new Date(a.created_at) -
+          new Date(b.created_at)
+      );
+
+    }else if(sort === "name"){
+
+      filtered.sort(
+        (a,b) =>
+          a.file_name
+            .localeCompare(
+              b.file_name
+            )
+      );
+
+    }else if(sort === "size"){
+
+      filtered.sort(
+        (a,b) =>
+          Number(b.file_size || 0) -
+          Number(a.file_size || 0)
+      );
+
+    }
+
+    if(!filtered.length){
+
+      gallery.innerHTML = `
+        <div class="empty">
+          <div class="empty-icon">🖼️</div>
+          No photos found.
+        </div>
+      `;
+
+      return;
+    }
+
+    gallery.innerHTML = "";
+
+    for(const photo of filtered){
+
+      const url =
+        await getPhotoUrl(
+          photo.path
+        );
+
+      if(!url)
+        continue;
+
+      const card =
+        document.createElement("div");
+
+      card.className =
+        "photo-card";
+
+      card.onclick =
+        () =>
+          openViewer(
+            photo,
+            url
+          );
+
+      const img =
+        document.createElement("img");
+
+      img.src = url;
+
+      img.alt =
+        photo.file_name;
+
+      img.loading =
+        "lazy";
+
+      const overlay =
+        document.createElement("div");
+
+      overlay.className =
+        "photo-overlay";
+
+      const name =
+        document.createElement("div");
+
+      name.className =
+        "photo-name";
+
+      name.textContent =
+        photo.file_name;
+
+      const actions =
+        document.createElement("div");
+
+      actions.className =
+        "photo-actions";
+
+      const download =
+        document.createElement("button");
+
+      download.textContent =
+        "Download";
+
+      download.onclick =
+        e => {
+
+          e.stopPropagation();
+
+          downloadPhoto(
+            photo,
+            url
+          );
+
+        };
+
+      const del =
+        document.createElement("button");
+
+      del.textContent =
+        "Delete";
+
+      del.className =
+        "delete";
+
+      del.onclick =
+        e => {
+
+          e.stopPropagation();
+
+          deletePhoto(photo);
+
+        };
+
+      actions.appendChild(download);
+
+      actions.appendChild(del);
+
+      overlay.appendChild(name);
+
+      overlay.appendChild(actions);
+
+      card.appendChild(img);
+
+      card.appendChild(overlay);
+
+      gallery.appendChild(card);
+
+    }
+
+  }
+
+
+  /* DOWNLOAD */
+
+  async function downloadPhoto(
+    photo,
+    url
+  ){
+
+    try{
+
+      const response =
+        await fetch(url);
+
+      const blob =
+        await response.blob();
+
+      const blobUrl =
+        URL.createObjectURL(blob);
+
+      const a =
+        document.createElement("a");
+
+      a.href =
+        blobUrl;
+
+      a.download =
+        photo.file_name;
+
+      document.body.appendChild(a);
+
+      a.click();
+
+      a.remove();
+
+      URL.revokeObjectURL(
+        blobUrl
+      );
+
+      toast("Download started");
+
+    }catch(error){
+
+      console.error(error);
+
+      toast("Download failed");
+
+    }
+
+  }
+
+
+  /* DELETE */
+
+  async function deletePhoto(photo){
+
+    const confirmed =
+      confirm(
+        "Delete this photo permanently?"
+      );
+
+    if(!confirmed)
+      return;
+
+    const {
+      error:storageError
+    } =
+      await supabaseClient
+        .storage
+        .from("photos")
+        .remove([
+          photo.path
+        ]);
+
+    if(storageError){
+
+      toast(
+        storageError.message
+      );
+
+      return;
+    }
+
+    const {
+      error:dbError
+    } =
+      await supabaseClient
+        .from("photo_metadata")
+        .delete()
+        .eq(
+          "id",
+          photo.id
+        )
+        .eq(
+          "user_id",
+          currentUser.id
+        );
+
+    if(dbError){
+
+      toast(
+        dbError.message
+      );
+
+      return;
+    }
+
+    photos =
+      photos.filter(
+        p =>
+          p.id !== photo.id
+      );
+
+    $("photoCount")
+      .textContent =
+      photos.length;
+
+    updateStorage();
+
+    renderGallery();
+
+    toast("Photo deleted");
+
+  }
+
+
+  /* VIEWER */
+
+  function openViewer(
+    photo,
+    url
+  ){
+
+    currentViewerPhoto =
+      {
+        photo,
+        url
+      };
+
+    zoomLevel = 1;
+
+    $("viewerImage").src =
+      url;
+
+    $("viewerImage")
+      .style.transform =
+      "scale(1)";
+
+    $("viewer")
+      .classList.add("show");
+
+  }
+
+
+  function closeViewer(){
+
+    $("viewer")
+      .classList.remove("show");
+
+    currentViewerPhoto =
+      null;
+
+    zoomLevel = 1;
+
+  }
+
+
+  function zoomIn(){
+
+    zoomLevel =
+      Math.min(
+        zoomLevel + .25,
+        4
+      );
+
+    applyZoom();
+
+  }
+
+
+  function zoomOut(){
+
+    zoomLevel =
+      Math.max(
+        zoomLevel - .25,
+        .5
+      );
+
+    applyZoom();
+
+  }
+
+
+  function resetZoom(){
+
+    zoomLevel = 1;
+
+    applyZoom();
+
+  }
+
+
+  function applyZoom(){
+
+    $("viewerImage")
+      .style.transform =
+      "scale(" +
+      zoomLevel +
+      ")";
+
+  }
+
+
+  async function downloadCurrentPhoto(){
+
+    if(
+      !currentViewerPhoto
+    )
+      return;
+
+    await downloadPhoto(
+      currentViewerPhoto.photo,
+      currentViewerPhoto.url
     );
-}
+
+  }
 
 
-[
-  "click",
-  "touchstart",
-  "keydown",
-  "scroll"
-].forEach(
-  eventName => {
+  async function toggleFullscreen(){
 
-    document.addEventListener(
-      eventName,
-      () => {
+    const viewer =
+      $("viewer");
 
-        if (currentUser){
-          resetInactivityTimer();
+    try{
+
+      if(!document.fullscreenElement){
+
+        await viewer.requestFullscreen();
+
+      }else{
+
+        await document.exitFullscreen();
+
+      }
+
+    }catch(error){
+
+      console.error(error);
+
+    }
+
+  }
+
+
+  /* VIEWER CLOSE */
+
+  $("viewer")
+    .addEventListener(
+      "click",
+      e => {
+
+        if(
+          e.target ===
+          $("viewer")
+        ){
+
+          closeViewer();
+
         }
 
-      },
-      {
-        passive:true
       }
     );
-  }
-);
 
 
-/* =====================================================
-   KEYBOARD CONTROLS
-===================================================== */
+  /* KEYBOARD */
 
-document.addEventListener(
-  "keydown",
-  event => {
+  document.addEventListener(
+    "keydown",
+    e => {
 
-    if (event.key === "Escape"){
-
-      closeViewer();
-
-      closeAlbumModal();
-    }
-
-  }
-);
-
-
-/* =====================================================
-   CLICK OUTSIDE MODALS
-===================================================== */
-
-document
-  .getElementById("viewer")
-  .addEventListener(
-    "click",
-    event => {
-
-      if (
-        event.target.id === "viewer"
+      if(
+        e.key === "Escape"
       ){
+
         closeViewer();
+
       }
 
     }
   );
 
 
-document
-  .getElementById("albumModal")
-  .addEventListener(
-    "click",
-    event => {
+  /* THEME */
 
-      if (
-        event.target.id === "albumModal"
-      ){
-        closeAlbumModal();
-      }
+  function toggleTheme(){
 
-    }
-  );
+    document.body
+      .classList
+      .toggle("light");
 
-
-/* =====================================================
-   SUPABASE AUTH STATE
-===================================================== */
-
-supabaseClient.auth.onAuthStateChange(
-  async (event, session) => {
-
-    if (
-      event === "SIGNED_OUT"
-    ){
-
-      currentUser = null;
-
-      document
-        .getElementById("app")
+    const light =
+      document.body
         .classList
-        .add("hidden");
+        .contains("light");
 
-      document
-        .getElementById("authScreen")
-        .classList
-        .remove("hidden");
-
-    }
+    localStorage.setItem(
+      "vault-theme",
+      light
+        ? "light"
+        : "dark"
+    );
 
   }
-);
 
 
-/* =====================================================
-   START
-===================================================== */
+  /* LOAD THEME */
 
-loadTheme();
+  if(
+    localStorage.getItem(
+      "vault-theme"
+    ) === "light"
+  ){
 
-checkSession();
+    document.body
+      .classList
+      .add("light");
+
+  }
+
+
+  /* PROFILE */
+
+  function showProfile(){
+
+    $("profileCard")
+      .classList
+      .toggle("hidden");
+
+    $("profileEmail")
+      .textContent =
+      currentUser
+        ? currentUser.email
+        : "-";
+
+    $("profilePhotos")
+      .textContent =
+      photos.length;
+
+    updateStorage();
+
+  }
+
+
+  /* AUTO LOGOUT */
+
+  let inactivityTimer;
+
+  const AUTO_LOGOUT_TIME =
+    30 * 60 * 1000;
+
+  function resetInactivity(){
+
+    clearTimeout(
+      inactivityTimer
+    );
+
+    if(!currentUser)
+      return;
+
+    inactivityTimer =
+      setTimeout(
+        async () => {
+
+          toast(
+            "Logged out due to inactivity"
+          );
+
+          await logout();
+
+        },
+        AUTO_LOGOUT_TIME
+      );
+
+  }
+
+
+  [
+    "click",
+    "touchstart",
+    "mousemove",
+    "keydown",
+    "scroll"
+  ].forEach(event => {
+
+    document.addEventListener(
+      event,
+      resetInactivity,
+      {passive:true}
+    );
+
+  });
+
+
+  /* CLOSE ALBUM MODAL */
+
+  $("albumModal")
+    .addEventListener(
+      "click",
+      e => {
+
+        if(
+          e.target ===
+          $("albumModal")
+        ){
+
+          closeAlbumModal();
+
+        }
+
+      }
+    );
+
+
+  /* ENTER KEY FOR ALBUM */
+
+  $("albumName")
+    .addEventListener(
+      "keydown",
+      e => {
+
+        if(
+          e.key === "Enter"
+        ){
+
+          saveAlbum();
+
+        }
+
+      }
+    );
+
 
 </script>
 
